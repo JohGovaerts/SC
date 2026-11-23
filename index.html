@@ -34,10 +34,13 @@ button.card{display:block;color:inherit}button.card.on{background:linear-gradien
 .pcfg{padding:12px 14px}
 .dim{color:#8a94a6}.small{font-size:13px}.warn{color:var(--amber);font-size:13px;margin:6px 0}.hint{color:#7fe3ff;font-size:13px;margin:6px 0;font-family:ui-monospace,Menlo,monospace}
 #game{display:flex;height:100%;width:100%}
-#boardwrap{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;padding:4px;position:relative;background:radial-gradient(ellipse at center,#12161c,#06080a)}
+#boardwrap{flex:1;min-width:0;position:relative;background:radial-gradient(ellipse at center,#12161c,#06080a)}
 #boardwrap::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(#0000 0 3px,#0000001f 3px 4px)}
 #boardwrap.alien::after{background:repeating-linear-gradient(#0000 0 3px,#ff00001c 3px 4px);box-shadow:inset 0 0 90px #ff1a1a55}
-#cv{display:block;touch-action:none}
+#scroller{position:absolute;inset:0;overflow:auto;display:flex;-webkit-overflow-scrolling:touch}
+#cv{display:block;margin:auto;flex:none;touch-action:pan-x pan-y}
+#zoombar{position:absolute;left:8px;bottom:8px;z-index:5;display:flex;gap:4px;background:#000a;padding:4px;border-radius:8px;border:1px solid #3a4454}
+#zoombar button{min-height:38px;min-width:38px;padding:4px 10px;font-size:16px}
 #side{width:350px;max-width:42vw;display:flex;flex-direction:column;border-left:3px solid #000;background:linear-gradient(#15191f,#0f1216);height:100%;box-shadow:-6px 0 14px #0008}
 #banner{padding:11px 12px 14px;font-size:20px;color:#f3f5f8;border-left:8px solid #444;background:linear-gradient(#232933,#171b21);display:flex;justify-content:space-between;align-items:center;gap:8px;position:relative}
 #banner::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--haz)}
@@ -55,10 +58,15 @@ button.card{display:block;color:inherit}button.card.on{background:linear-gradien
 .score>div{padding:5px 8px;margin:4px 0;background:#161a21;border-radius:4px}
 .thumbs{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}.thumbs img{width:26px;height:26px;border-radius:3px;border:1px solid #000}
 @media (max-width:820px){#game{flex-direction:column}#side{width:100%;max-width:none;height:44%;border-left:0;border-top:3px solid #000}#log{display:none}}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}@media (max-width:700px){.opts{grid-template-columns:1fr}}
+button.card.opt{margin:0;padding:8px 10px;min-height:0}button.card.opt.on{background:linear-gradient(#25479a,#1a2f6a);border-color:#8fb0ff}
+button.card.eq{margin:4px 0;padding:8px 10px;min-height:0}button.card.eq.used{opacity:.5}
+.wpl{margin:6px 0;font-size:12.5px;color:#aab4c4;line-height:1.4}.wpl div{margin:2px 0}
 </style></head><body>
 <div id="setup" class="screen"></div>
 <div id="game" class="screen hidden">
- <div id="boardwrap"><canvas id="cv"></canvas></div>
+ <div id="boardwrap"><div id="scroller"><canvas id="cv"></canvas></div>
+  <div id="zoombar"><button data-z="all">Alles</button><button data-z="0,0">↖</button><button data-z="1,0">↗</button><button data-z="0,1">↙</button><button data-z="1,1">↘</button><button data-z="out">−</button><button data-z="in">+</button></div></div>
  <aside id="side"><div id="banner"><span id="bt"></span><button id="menu">☰</button></div><div id="panel"></div><div id="log"></div></aside>
 </div>
 <div id="toast"></div>
@@ -109,6 +117,17 @@ const CMDR_SETS = {
   hb:    { name: 'Heavy Bolter', fire: ['H', 'H'], hth: ['L', 'L'], style: 'single' },
 };
 CMDR_SETS.axe.name = 'Power Axe + Bolt Pistol';
+const WP_TXT = {
+  bolter: 'Beweging 6. Schiet met 2 lichte dobbelstenen op één doel in zicht.',
+  ac: 'Beweging 4. 2 zware dobbelstenen; het totaal mag je over meerdere doelen in zicht verdelen.',
+  ml: 'Beweging 4. Kies een doelvak in zicht: het vak krijgt het totaal, aangrenzende vakken de hoogste dobbelsteen (ook eigen mannen!).',
+  pg: 'Beweging 4. Schiet een rechte lijn (8 richtingen) die alles raakt, ook eigen mannen.',
+};
+const CMDR_TXT = {
+  axe: 'Schiet 2 lichte dobbelstenen, handgemeen 2 zware. Evenwichtig.',
+  glove: 'Kan niet schieten, maar rolt in handgemeen 2 zware + 2 lichte dobbelstenen. Alleen voor de close-up.',
+  hb: 'Schiet 2 zware dobbelstenen, zwak in handgemeen (2 lichte). Goed op afstand.',
+};
 
 /* ====== Kaarten ====== */
 const EQUIP = {
@@ -1461,23 +1480,34 @@ const MISSION_TXT = {
 };
 
 /* ---------- Opmaak ---------- */
-let TILT = true, SY = .72, TOP = 0, CW = 0, CH = 0;
+let TILT = true, SY = .72, TOP = 0, CW = 0, CH = 0, ZF = 1, FITCS = 20;
 try { TILT = localStorage.getItem('mb_tilt') !== '0'; } catch (e) { }
 function setTilt(t) { TILT = t; try { localStorage.setItem('mb_tilt', t ? '1' : '0'); } catch (e) { } layout(); renderPanel(); }
 function initView() {
   let l = 0, r = 0, t = 0, b = 0;
   for (const bay of G.bays) { if (bay.side === 'left') l = 4; if (bay.side === 'right') r = 4; if (bay.side === 'top') t = 4; if (bay.side === 'bottom') b = 4; }
-  VX = OFF - l; VY = OFF - t; VW = 24 + l + r; VH = 24 + t + b;
+  VX = OFF - l; VY = OFF - t; VW = 24 + l + r; VH = 24 + t + b; ZF = 1;
   G.wallList = [...G.wall].map(k => { const o = k[0]; const [a, b2] = k.slice(1).split(',').map(Number); return { o, a, b: b2 }; })
     .filter(w => w.a >= OFF - 1 && w.b >= OFF - 1 && w.a <= OFF + 24 && w.b <= OFF + 24);
-  layout();
+  layout(null);
 }
-function layout() {
+function viewCenter() {
+  const sc = $('scroller'); if (!CS || !cvs.offsetWidth) return null;
+  return [VX + (sc.scrollLeft + sc.clientWidth / 2 - cvs.offsetLeft) / CS, VY + (sc.scrollTop + sc.clientHeight / 2 - cvs.offsetTop - TOP) / (CS * SY)];
+}
+function scrollToCell(cx0, cy0) {
+  const sc = $('scroller');
+  sc.scrollLeft = Math.max(0, cvs.offsetLeft + PX(cx0) - sc.clientWidth / 2);
+  sc.scrollTop = Math.max(0, cvs.offsetTop + PY(cy0) - sc.clientHeight / 2);
+}
+function layout(center) {
   if (!G) return;
+  const c0 = center === undefined ? viewCenter() : center;
   SY = TILT ? .72 : 1;
-  const wrap = $('boardwrap'); const W = wrap.clientWidth - 8, H = wrap.clientHeight - 8;
+  const sc = $('scroller'); const W = sc.clientWidth - 8, H = sc.clientHeight - 8;
   const hm = TILT ? 1.15 : 0;
-  CS = Math.max(8, Math.floor(Math.min(W / VW, H / (VH * SY + hm))));
+  FITCS = Math.max(8, Math.floor(Math.min(W / VW, H / (VH * SY + hm))));
+  CS = Math.max(8, Math.round(FITCS * ZF));
   TOP = Math.round(hm * CS);
   CW = VW * CS; CH = Math.ceil(VH * CS * SY + TOP);
   const dpr = window.devicePixelRatio || 1;
@@ -1486,7 +1516,21 @@ function layout() {
   cx.setTransform(dpr, 0, 0, dpr, 0, 0);
   TINT.clear(); MFIG.clear();
   draw();
+  if (ZF > 1 && c0) scrollToCell(c0[0], c0[1]);
+  else { sc.scrollLeft = 0; sc.scrollTop = 0; }
+  updateZoomBar();
 }
+function setZoom(z, center) { ZF = Math.max(1, Math.min(4, z)); layout(center); }
+function zoomSegment(qx, qy) {
+  const sc = $('scroller'); const W = sc.clientWidth - 8, H = sc.clientHeight - 8; const hm = TILT ? 1.15 : 0;
+  const fit = Math.max(8, Math.floor(Math.min(W / VW, H / (VH * (TILT ? .72 : 1) + hm))));
+  const want = Math.min(W / 13.5, H / (13 * (TILT ? .72 : 1) + hm + .6));
+  ZF = Math.max(1, Math.min(4, want / fit));
+  layout([OFF + qx * 12 + 6, OFF + qy * 12 + 6]);
+  // layout ziet ZF == 1 als niet-gezoomd: forceer de middenpositie
+  if (ZF > 1) scrollToCell(OFF + qx * 12 + 6, OFF + qy * 12 + 6);
+}
+function updateZoomBar() { const z = $('zoombar'); if (z) z.dataset.z = ZF > 1.02 ? '1' : '0'; }
 window.addEventListener('resize', () => { if (G) layout(); });
 const PX = x => (x - VX) * CS, PY = y => TOP + (y - VY) * CS * SY;
 
@@ -1786,10 +1830,10 @@ function showReroll(dice, types, label) {
 /* ---------- Acties: regels ---------- */
 function limits(u) {
   const P = pl(u), o = P.activeOrder; let L = 1, maxMove = 1, maxFire = 1, same = false;
-  if (o === 'move_it') { L = 2; maxMove = 2; maxFire = 1; }
-  else if (o === 'fire') { L = 2; maxMove = 1; maxFire = 2; }
+  if (o === 'move_it') { L = 3; maxMove = 2; maxFire = 1; }
+  else if (o === 'fire') { L = 3; maxMove = 1; maxFire = 2; }
   else if (o === 'by_sections') { L = 2; maxMove = 2; maxFire = 2; same = true; }
-  else if (o === 'heavy_weapon' && P.heavyUnit === u.id) { L = 2; maxMove = 2; maxFire = 2; }
+  else if (o === 'heavy_weapon' && P.heavyUnit === u.id) { L = 4; maxMove = 2; maxFire = 2; }
   return { L, maxMove, maxFire, same };
 }
 function canAct(u, type) {
@@ -1934,6 +1978,7 @@ async function startMarineTurn(p) {
   P.activeOrder = null; P.usedTurnOrder = false; P.photonActive = false; P.scanView = null; P.heavyUnit = null;
   for (const u of marines()) if (u.owner === p) { u.nMove = 0; u.nFire = 0; u.nHth = 0; }
   clearSel(); S.info = null; setBanner();
+  if (ZF > 1) { const m0 = marines().find(m => m.owner === p); if (m0) scrollToCell(m0.x, m0.y); }
   log(`— ${P.name} aan de beurt —`, 'hdr');
   renderPanel(); draw();
   if (G.players.length > 1) toast(`${P.name} is aan de beurt`);
@@ -2005,6 +2050,7 @@ function unitCard(u) {
     const sp = wpSpec(u);
     h += ` <span class="dim">${u.kind === 'cmdr' ? CMDR_SETS[u.cset].name : MARINE_WP[u.wp].name}${u.combiMode ? ' (als Plasma Gun)' : ''}</span><br>Leven ${u.life}/${u.maxLife} · Pantser ${armourOf(u)} · Beweging ${moveAllowance(u)}`;
     h += `<br>Schiet: ${sp.dice.map(d => d === 'H' ? '🔴' : '⚪').join('') || '—'} · Handgemeen: ${hthDice(u).map(d => d === 'H' ? '🔴' : '⚪').join('')}`;
+    h += `<br><span class="dim small">${u.kind === 'cmdr' ? CMDR_TXT[u.cset] : WP_TXT[u.wp]}</span>`;
   } else if (u.kind === 'blip') h += '<br>Onbekende alien.';
   else {
     const a = u.alien; h += `<br>Leven ${u.life}/${u.maxLife} · Pantser ${u.armour} · Beweging ${a.mv}<br>Schiet: ${wpSpec(u).dice.map(d => d === 'H' ? '🔴' : '⚪').join('') || '—'} · Handgemeen: ${a.hth.map(d => d === 'H' ? '🔴' : '⚪').join('')}`;
@@ -2031,14 +2077,13 @@ function renderPanel() {
     if (P.jammed) h += '<div class="warn">Zware wapens haperen deze beurt.</div>';
     if (P.noCmdr) h += '<div class="warn">Commander moet melding doen: kan niets doen.</div>';
     // uitrusting
-    h += '<div class="sec">Uitrusting</div><div class="chips">';
+    h += '<div class="sec">Uitrusting</div>';
     P.eq.forEach((e, i) => {
       const E = EQUIP[e.id];
       const active = !E.perm || ['bioscan', 'combi'].includes(e.id);
-      const label = E.name + (e.wp ? ` (${MARINE_WP[e.wp].lab})` : '');
-      h += `<button class="chip ${e.used ? 'used' : ''}" ${(!active || e.used || G.busy) ? 'disabled' : ''} data-a="equip" data-i="${i}" title="${esc(E.txt)}">${label}</button>`;
+      const label = E.name + (e.wp ? ` (${MARINE_WP[e.wp].name})` : '');
+      h += `<button class="card btn eq ${e.used ? 'used' : ''}" ${(!active || e.used || G.busy) ? 'disabled' : ''} data-a="equip" data-i="${i}"><b>${label}</b>${e.used ? ' ✓' : (E.perm && !active ? ' <span class="dim">(altijd actief)</span>' : '')}<br><span class="dim small">${E.txt}</span></button>`;
     });
-    h += '</div>';
     // geselecteerde unit
     if (P.pickHeavy) h += '<div class="warn">Heavy Weapon!: tik op de Marine met zwaar wapen.</div>';
     if (u) {
@@ -2203,8 +2248,11 @@ function renderSetup() {
     for (const k of Object.keys(CMDR_SETS)) h += `<button class="${c.cmdr === k ? 'on' : ''}" data-s="cmdr" data-p="${i}" data-v="${k}">${CMDR_SETS[k].name}</button>`;
     h += '</div><div class="lbl">4 Marines (minstens 1 zwaar wapen en 1 Bolter)</div><div class="row wrap">';
     c.marines.forEach((w, j) => { h += `<select data-s="marine" data-p="${i}" data-j="${j}">${Object.keys(MARINE_WP).map(k => `<option value="${k}" ${w === k ? 'selected' : ''}>${MARINE_WP[k].name}</option>`).join('')}</select>`; });
-    h += `</div><div class="lbl">Uitrusting (kies ${eqCount(c.chapter)})</div><div class="chips">`;
-    cc.equip.forEach((id, j) => { h += `<button class="chip ${c.eqIdx.includes(j) ? 'on' : ''}" data-s="equip" data-p="${i}" data-j="${j}" title="${esc(EQUIP[id].txt)}">${EQUIP[id].name}</button>`; });
+    h += '</div>';
+    h += '<div class="wpl">' + Object.keys(MARINE_WP).map(k => `<div><b>${MARINE_WP[k].name}</b> — ${WP_TXT[k]}</div>`).join('') + '</div>';
+    h += `<div class="dim small" style="margin-top:6px"><b>${CMDR_SETS[c.cmdr].name}</b> — ${CMDR_TXT[c.cmdr]}</div>`;
+    h += `<div class="lbl">Uitrusting (kies ${eqCount(c.chapter)})</div><div class="opts">`;
+    cc.equip.forEach((id, j) => { h += `<button class="card opt ${c.eqIdx.includes(j) ? 'on' : ''}" data-s="equip" data-p="${i}" data-j="${j}"><b>${EQUIP[id].name}</b><br><span class="dim small">${EQUIP[id].txt}</span></button>`; });
     h += '</div>';
     const nt = c.eqIdx.filter(j => cc.equip[j] === 'targeter').length;
     if (nt) {
@@ -2212,8 +2260,8 @@ function renderSetup() {
       for (let t = 0; t < nt; t++) h += `<select data-s="targeter" data-p="${i}" data-j="${t}">${Object.keys(MARINE_WP).map(k => `<option value="${k}" ${(c.targeter[t] || 'bolter') === k ? 'selected' : ''}>${MARINE_WP[k].name}</option>`).join('')}</select>`;
       h += '</div>';
     }
-    h += `<div class="lbl">Order-kaarten (kies ${allowedOrders(c.chapter)})</div><div class="row wrap">`;
-    cc.order.forEach((id, j) => { h += `<button class="chip ${c.orders.includes(j) ? 'on' : ''}" data-s="order" data-p="${i}" data-j="${j}" title="${esc(ORDERS[id].txt)}">${ORDERS[id].name}</button>`; });
+    h += `<div class="lbl">Order-kaarten (kies ${allowedOrders(c.chapter)})</div><div class="opts">`;
+    cc.order.forEach((id, j) => { h += `<button class="card opt ${c.orders.includes(j) ? 'on' : ''}" data-s="order" data-p="${i}" data-j="${j}"><b>${ORDERS[id].name}</b><br><span class="dim small">${ORDERS[id].txt}</span></button>`; });
     h += '</div>';
     if (errs.length) h += `<div class="warn">${errs.join(', ')}</div>`;
     h += '</div>';
@@ -2267,7 +2315,16 @@ async function startGame() {
 /* ---------- Opstart ---------- */
 window.addEventListener('DOMContentLoaded', () => {
   cvs = $('cv'); cx = cvs.getContext('2d');
-  cvs.addEventListener('pointerdown', onTap);
+  cvs.addEventListener('click', onTap);
+  $('zoombar').addEventListener('click', ev => {
+    const el = ev.target.closest('[data-z]'); if (!el || !G) return; const v = el.dataset.z;
+    if (v === 'all') setZoom(1, null); else if (v === 'in') setZoom(ZF * 1.35); else if (v === 'out') setZoom(ZF / 1.35);
+    else { const [qx, qy] = v.split(',').map(Number); zoomSegment(qx, qy); }
+  });
+  let pinch = null; const sc = $('scroller'); const td = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  sc.addEventListener('touchstart', e => { if (e.touches.length === 2) pinch = { d: td(e.touches), z: ZF }; }, { passive: true });
+  sc.addEventListener('touchmove', e => { if (pinch && e.touches.length === 2) { e.preventDefault(); const z = pinch.z * td(e.touches) / pinch.d; if (Math.abs(z - ZF) > .03) setZoom(z); } }, { passive: false });
+  sc.addEventListener('touchend', e => { if (e.touches.length < 2) pinch = null; });
   $('setup').addEventListener('click', ev => { if (ev.target.id === 'start' || ev.target.closest('#start')) return startGame(); onSetup(ev); });
   $('setup').addEventListener('change', onSetup);
   $('panel').addEventListener('click', ev => {
