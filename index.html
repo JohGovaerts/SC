@@ -23,6 +23,11 @@ h1{margin:6px 0 0;font-size:38px;color:var(--amber);text-shadow:0 2px 0 #000}
 h1::after{content:"";display:block;height:10px;margin-top:8px;background:var(--haz)}
 h3{margin:0 0 8px;font-size:20px}
 .sec{margin:16px 0 6px;font-size:13px;color:#9aa6b8;border-bottom:1px solid var(--line);padding-bottom:3px}
+.acts{display:flex;gap:8px;margin:6px 0 4px}.ab{flex:1;min-width:0}
+button.act{width:100%;min-height:64px;font-size:14px;padding:4px 2px;font-weight:700;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#27402a;border:2px solid #5fbf6a;color:#eaffea}
+button.act .ai{font-size:24px;line-height:1}button.act.on{background:#f2bd2a;color:#10130d;border-color:#ffe08a;box-shadow:0 0 0 3px #f2bd2a55}
+button.act:disabled{background:#262b33;border-color:#3a414c;color:#6b7482}button.act.wide{margin:4px 0;min-height:44px;flex-direction:row;justify-content:center}
+.aw{font-size:11px;color:#c9a14a;text-align:center;min-height:14px;margin-top:2px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row button{flex:0 0 auto}
 .lbl{margin:10px 0 4px;font-size:12px;color:#9aa5b8;text-transform:uppercase;letter-spacing:.06em}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chip{padding:8px 10px;min-height:40px;font-size:14px}.chip.used{text-decoration:line-through}
@@ -2180,6 +2185,29 @@ function renderPanel() {
     if (P.noOrder) h += '<div class="warn">Communicatiestoring: geen Orders deze beurt.</div>';
     if (P.jammed) h += '<div class="warn">Zware wapens haperen deze beurt.</div>';
     if (P.noCmdr) h += '<div class="warn">Commander moet melding doen: kan niets doen.</div>';
+    // acties (direct onder de orders)
+    if (P.pickHeavy) h += '<div class="warn">Heavy Weapon!: tik op de Marine met zwaar wapen.</div>';
+    h += '<div class="sec">Acties</div>';
+    {
+      const mk = (m, ico, lab, ok, why) => `<div class="ab"><button data-a="mode" data-m="${m}" class="act ${u && S.mode === m ? 'on' : ''}" ${u && ok ? '' : 'disabled'}><span class="ai">${ico}</span>${lab}</button><div class="aw">${u && !ok ? why : ''}</div></div>`;
+      h += '<div class="acts">';
+      h += mk('move', '👣', 'Beweeg', u && canAct(u, 'move'), 'limiet bereikt');
+      h += mk('fire', '🎯', 'Schiet', u && canAct(u, 'fire'), 'limiet bereikt');
+      h += mk('hth', '⚔️', 'Handgemeen', u && canAct(u, 'hth') && hthTargets(u).length, u && canAct(u, 'hth') ? 'geen doel' : 'limiet bereikt');
+      h += '</div>';
+      if (u && G.mission.tele && !G.teleDestroyed && nearTele(u)) h += `<button class="act wide" data-a="tele" ${canAct(u, 'hth') ? '' : 'disabled'}>Teleporter</button>`;
+      if (u) {
+        h += `<div class="dim small">${esc(unitName(u))}: ${u.nMove || 0}× bewogen, ${u.nFire || 0}× actie</div>`;
+        if (S.mode === 'fire') {
+          const st2 = wpSpec(u).style;
+          h += `<div class="hint">${st2 === 'pg' ? 'Tik in de richting van de straal (8 richtingen).' : st2 === 'ml' ? 'Tik op het doelvak (geel).' : 'Tik op een rood omcirkeld doel.'}</div>`;
+          if (!S.targets.length && (st2 === 'single' || st2 === 'ac')) h += '<div class="hint">Geen doelwit in zicht.</div>';
+        }
+        if (S.mode === 'move') h += '<div class="hint">Tik op een blauw vak.</div>';
+        if (S.mode === 'hth') h += '<div class="hint">Tik op een omcirkeld doel.</div>';
+      } else h += '<div class="hint">Tik op een eigen Marine om te selecteren.</div>';
+    }
+    if (u) h += unitCard(u);
     // uitrusting
     h += '<div class="sec">Uitrusting</div>';
     P.eq.forEach((e, i) => {
@@ -2188,25 +2216,6 @@ function renderPanel() {
       const label = E.name + (e.wp ? ` (${MARINE_WP[e.wp].name})` : '');
       h += `<div class="cw"><button class="card btn eq ${e.used ? 'used' : ''}" ${(!active || e.used || G.busy) ? 'disabled' : ''} data-a="equip" data-i="${i}"><b>${label}</b>${e.used ? ' ✓' : (E.perm && !active ? ' <span class="dim">(altijd actief)</span>' : '')}<br><span class="dim small">${E.txt}</span></button>${thumb(P.chapter, e.id)}</div>`;
     });
-    // geselecteerde unit
-    if (P.pickHeavy) h += '<div class="warn">Heavy Weapon!: tik op de Marine met zwaar wapen.</div>';
-    if (u) {
-      h += unitCard(u);
-      const st = `${u.nMove || 0}× bewogen, ${u.nFire || 0}× actie`;
-      h += `<div class="dim small">${st}</div><div class="row">`;
-      h += `<button data-a="mode" data-m="move" class="${S.mode === 'move' ? 'on' : ''}" ${canAct(u, 'move') ? '' : 'disabled'}>Beweeg</button>`;
-      h += `<button data-a="mode" data-m="fire" class="${S.mode === 'fire' ? 'on' : ''}" ${canAct(u, 'fire') ? '' : 'disabled'}>Schiet</button>`;
-      h += `<button data-a="mode" data-m="hth" class="${S.mode === 'hth' ? 'on' : ''}" ${canAct(u, 'hth') && hthTargets(u).length ? '' : 'disabled'}>Handgemeen</button>`;
-      if (G.mission.tele && !G.teleDestroyed && nearTele(u)) h += `<button data-a="tele" ${canAct(u, 'hth') ? '' : 'disabled'}>Teleporter</button>`;
-      h += '</div>';
-      if (S.mode === 'fire') {
-        const st2 = wpSpec(u).style;
-        h += `<div class="hint">${st2 === 'pg' ? 'Tik in de richting van de straal (8 richtingen).' : st2 === 'ml' ? 'Tik op het doelvak (geel).' : 'Tik op een rood omcirkeld doel.'}</div>`;
-        if (!S.targets.length && (st2 === 'single' || st2 === 'ac')) h += '<div class="hint">Geen doelwit in zicht.</div>';
-      }
-      if (S.mode === 'move') h += '<div class="hint">Tik op een blauw vak.</div>';
-      if (S.mode === 'hth') h += '<div class="hint">Tik op een omcirkeld doel.</div>';
-    } else h += '<div class="hint">Tik op een eigen Marine om te selecteren.</div>';
     if (S.info && S.info.alive) h += unitCard(S.info);
     h += `<button class="big" data-a="end" ${G.busy ? 'disabled' : ''}>Einde beurt</button>`;
   }
