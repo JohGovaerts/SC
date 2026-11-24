@@ -57,6 +57,11 @@ button.card{display:block;color:inherit}button.card.on{background:linear-gradien
 .tb{width:100%;border-collapse:collapse}.tb td,.tb th{padding:6px;text-align:left;border-bottom:1px solid #2a3140}
 .score>div{padding:5px 8px;margin:4px 0;background:#161a21;border-radius:4px}
 .thumbs{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}.thumbs img{width:26px;height:26px;border-radius:3px;border:1px solid #000}
+#dicefx{position:absolute;left:50%;top:14%;transform:translateX(-50%);z-index:8;background:#000c;border:1px solid var(--amber);border-radius:8px;padding:10px 16px;max-width:92%;cursor:pointer}
+.drow{display:flex;flex-direction:column;align-items:center;margin:4px 0}.dlab{font:12px ui-monospace,Menlo,monospace;color:var(--amber);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.dd{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.dtot{font:700 15px ui-monospace,Menlo,monospace;color:#fff;margin-top:6px;min-height:20px}
+.dx{width:52px;height:52px;border-radius:9px;background:linear-gradient(#f4f6f9,#c9ced7);color:#111;font:700 28px/52px Helvetica,Arial,sans-serif;text-align:center;box-shadow:0 4px 0 #6b7280,0 8px 14px #000a;opacity:0}
+.dx.red{background:linear-gradient(#ee5a4f,#b21f1a);color:#fff;box-shadow:0 4px 0 #6b0f0b,0 8px 14px #000a}.dx.set{outline:2px solid #ffe08a}
 @media (max-width:820px){#game{flex-direction:column}#side{width:100%;max-width:none;height:44%;border-left:0;border-top:3px solid #000}#log{display:none}}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}@media (max-width:700px){.opts{grid-template-columns:1fr}}
 button.card.opt{margin:0;padding:8px 10px;min-height:0}button.card.opt.on{background:linear-gradient(#25479a,#1a2f6a);border-color:#8fb0ff}
@@ -66,6 +71,7 @@ button.card.eq{margin:4px 0;padding:8px 10px;min-height:0}button.card.eq.used{op
 <div id="setup" class="screen"></div>
 <div id="game" class="screen hidden">
  <div id="boardwrap"><div id="scroller"><canvas id="cv"></canvas></div>
+  <div id="dicefx" class="hidden"></div>
   <div id="zoombar"><button data-z="all">Alles</button><button data-z="0,0">↖</button><button data-z="1,0">↗</button><button data-z="0,1">↙</button><button data-z="1,1">↘</button><button data-z="out">−</button><button data-z="in">+</button></div></div>
  <aside id="side"><div id="banner"><span id="bt"></span><button id="menu">☰</button></div><div id="panel"></div><div id="log"></div></aside>
 </div>
@@ -488,6 +494,12 @@ function newUnit(o) {
   const u = Object.assign({ id: UID++, alive: true, life: 1, maxLife: 1, size: 1 }, o);
   if (u.side === 'A' && u.kind !== 'blip') {
     u.alien = ALIEN[u.kind]; u.armour = u.alien.ar;
+    if (u.kind === 'ork' || u.kind === 'gretchin') {   // kosmetische look: 4 ork-/6 gretchin-ontwerpen, 2 van elk in de doos
+      const designs = u.kind === 'ork' ? 'abcd' : 'abcdef', inUse = {};
+      try { for (const a of aliens()) if (a.kind === u.kind && a.look) inUse[a.look] = (inUse[a.look] || 0) + 1; } catch (e) {}
+      let free = [...designs].filter(d => (inUse[d] || 0) < 2); if (!free.length) free = [...designs];
+      u.look = free[rnd(free.length)];
+    }
     if (u.kind === 'dread') { u.life = 3; u.maxLife = 3; u.size = 2; { const cb = [['pg', 'ac'], ['pg', 'ml'], ['ml', 'ac']][rnd(3)]; u.weapons = cb.slice(); u.dkey = cb.join('_'); } }
   }
   return u;
@@ -732,7 +744,7 @@ function logRoll(who, dice, label) { log(`${who} rolt ${label}: [${dice.join(' '
 /* Enkel doel */
 async function fireSingle(u, t, spec, ctx) {
   let dice = rollSpec(spec.dice);
-  logRoll(unitName(u), dice, 'schot');
+  logRoll(unitName(u), dice, 'schot'); await rollFx([{ who: unitName(u), label: 'schot', dice, types: spec.dice }]);
   if (ctx && ctx.reroll) dice = await ctx.reroll(dice, spec.dice);
   const total = sum(dice);
   log(`${unitName(u)} schiet op ${unitName(t)} (pantser ${armourOf(t)}): ${total}.`);
@@ -741,7 +753,7 @@ async function fireSingle(u, t, spec, ctx) {
 /* Assault Cannon: verdeel punten over zichtbare doelen */
 async function fireAC(u, first, spec, ctx) {
   let dice = rollSpec(spec.dice);
-  logRoll(unitName(u), dice, 'Assault Cannon');
+  logRoll(unitName(u), dice, 'Assault Cannon'); await rollFx([{ who: unitName(u), label: 'Assault Cannon', dice, types: spec.dice }]);
   if (ctx && ctx.reroll) dice = await ctx.reroll(dice, spec.dice);
   let rem = sum(dice);
   log(`  Totaal ${rem} te verdelen.`);
@@ -769,7 +781,7 @@ function rayCells(u, dx, dy) {
 }
 async function firePG(u, dir, spec, ctx) {
   let dice = rollSpec(spec.dice);
-  logRoll(unitName(u), dice, 'Plasma Gun');
+  logRoll(unitName(u), dice, 'Plasma Gun'); await rollFx([{ who: unitName(u), label: 'Plasma Gun', dice, types: spec.dice }]);
   if (ctx && ctx.reroll) dice = await ctx.reroll(dice, spec.dice);
   const total = sum(dice);
   const hits = new Set();
@@ -779,7 +791,7 @@ async function firePG(u, dir, spec, ctx) {
 }
 async function fireML(u, cx, cy, spec, ctx) {
   let dice = rollSpec(spec.dice);
-  logRoll(unitName(u), dice, 'Missile Launcher');
+  logRoll(unitName(u), dice, 'Missile Launcher'); await rollFx([{ who: unitName(u), label: 'Missile Launcher', dice, types: spec.dice }]);
   if (ctx && ctx.reroll) dice = await ctx.reroll(dice, spec.dice);
   missileBlast(u, cx, cy, sum(dice), Math.max(...dice));
 }
@@ -804,6 +816,7 @@ async function hand2hand(a, d, ctx) {
   if (P && P.blades && a.diag && d.side === 'A') dd.pop();
   let ra = rollSpec(da), rd = rollSpec(dd);
   logRoll(unitName(a), ra, 'handgemeen'); logRoll(unitName(d), rd, 'verdediging');
+  await rollFx([{ who: unitName(a), label: 'handgemeen', dice: ra, types: da }, { who: unitName(d), label: 'verdediging', dice: rd, types: dd }]);
   if (ctx && ctx.reroll) ra = await ctx.reroll(ra, da);
   const sa = sum(ra), sd = sum(rd);
   if (sa === sd) { log('  Gelijkspel.'); return; }
@@ -978,6 +991,7 @@ async function moveUnitAlong(u, path) {
   // stap voor stap; deuren openen
   let moved = 0;
   for (let i = 1; i < path.length; i++) {
+    await glide(u, path[i][0], path[i][1], 80);
     u.x = path[i][0]; u.y = path[i][1]; moved++;
     rebuildOcc();
     openDoorsAround(u);
@@ -1593,7 +1607,7 @@ function marineFig(wp, color, cmdr, h) {
   MFIG.set(k, c); return c;
 }
 /* Eigen figuren: losse bestanden in map figuren/ (png). Ontbrekend = silhouet. */
-const FIG_NAMES = ["um_bolter","um_ac","um_ml","um_pg","um_commander_axe","um_commander_glove","um_commander_hb","ba_bolter","ba_ac","ba_ml","ba_pg","ba_commander_axe","ba_commander_glove","ba_commander_hb","if_bolter","if_ac","if_ml","if_pg","if_commander_axe","if_commander_glove","if_commander_hb","ork","gretchin","android","csm","csm_heavy","chaos_commander","dreadnought","dreadnought_pg_ac","dreadnought_pg_ml","dreadnought_ml_ac","genestealer"];
+const FIG_NAMES = ["um_bolter","um_ac","um_ml","um_pg","um_commander_axe","um_commander_glove","um_commander_hb","ba_bolter","ba_ac","ba_ml","ba_pg","ba_commander_axe","ba_commander_glove","ba_commander_hb","if_bolter","if_ac","if_ml","if_pg","if_commander_axe","if_commander_glove","if_commander_hb","ork","gretchin","ork_a","ork_b","ork_c","ork_d","gretchin_a","gretchin_b","gretchin_c","gretchin_d","gretchin_e","gretchin_f","android","csm","csm_heavy","chaos_commander","dreadnought","dreadnought_pg_ac","dreadnought_pg_ml","dreadnought_ml_ac","genestealer"];
 const FIGC = new Map(), FIGMETA = {};
 IMG.fig = {};
 function analyseFig(im) {
@@ -1692,7 +1706,7 @@ function draw() {
   if (TILT) for (const w of G.wallList) items.push({ k: w.o === 'v' ? w.b + 1 : w.b, f: () => drawWall(w) });
   else drawDoorsFlat();
   if (TILT) for (const d of G.doors) items.push({ k: doorKey(d), f: () => drawDoor3D(d) });
-  for (const u of G.units) if (u.alive) items.push({ k: u.y + u.size - .02, f: () => drawUnit(u) });
+  for (const u of G.units) if (u.alive) items.push({ k: (u.gy != null ? u.gy : u.y) + u.size - .02, f: () => { if (u.gx == null) return drawUnit(u); const ox = u.x, oy = u.y; u.x = u.gx; u.y = u.gy; try { drawUnit(u); } finally { u.x = ox; u.y = oy; } } });
   items.sort((a, b) => a.k - b.k);
   for (const it of items) it.f();
   drawOverlay();
@@ -1783,6 +1797,7 @@ function drawUnit(u) {
   if (u.side === 'M') spKey = pl(u).chapter.toLowerCase() + '_' + (u.kind === 'cmdr' ? 'commander_' + (u.cset || 'axe') : u.wp);
   else if (u.kind === 'dread') { spKey = IMG.fig['dreadnought_' + (u.dkey || 'x')] ? 'dreadnought_' + u.dkey : 'dreadnought'; bwS = CS * 1.8; }
   else if (u.kind === 'csm') spKey = u.heavy ? 'csm_heavy' : 'csm';
+  else if ((u.kind === 'ork' || u.kind === 'gretchin') && u.look && IMG.fig[u.kind + '_' + u.look]) spKey = u.kind + '_' + u.look;
   else spKey = ({ cmdrc: 'chaos_commander', ork: 'ork', gretchin: 'gretchin', android: 'android', genestealer: 'genestealer' })[u.kind] || null;
   if (u.kind === 'genestealer') bwS = CS * 1.05;
   const sp = spKey ? figSprite(spKey, bwS) : null;
@@ -1966,8 +1981,9 @@ async function doMove(u, x, y) {
   const res = reachable(u); const path = pathTo(res, x, y);
   if (path.length < 2) { G.busy = !!G.aiRun; toast('Dat vak is niet bereikbaar.'); renderPanel(); draw(); return; }
   for (let i = 1; i < path.length; i++) {
+    await glide(u, path[i][0], path[i][1], 95);
     u.x = path[i][0]; u.y = path[i][1]; rebuildOcc(); openDoorsAround(u); boardsEntered(u);
-    revealBlips(); draw(); await sleep(G.fast ? 0 : 70);
+    revealBlips(); draw();
   }
   spendAction(u, 'move'); clearSel(true);
   flushScan(); checkDock(); checkEnd();
@@ -2195,7 +2211,7 @@ function renderPanel() {
   h += `<div class="dim">Alien-reserve: ${G.blipPool.length} blips · ${G.reinfPool.length} versterkingen · ${aliens().length + blips().length} op bord</div></div>`;
   h += `<div class="row"><button class="small" data-a="mission">Missiedoelen</button><button class="small" data-a="view">${TILT ? 'Weergave: gekanteld' : 'Weergave: plat'}</button></div>`;
   $('panel').innerHTML = h;
-  renderLog();
+  renderLog(); autosaveSoon();
 }
 function renderLog() {
   const l = $('log'); if (!l || !G) return;
@@ -2203,16 +2219,19 @@ function renderLog() {
   l.scrollTop = l.scrollHeight;
 }
 function missionInfo() {
-  const r = G.mission.rules;
-  return `<h3>Missie ${G.mid}</h3><p><b>Primair (${MISSION_PTS.primary} pt):</b> ${MISSION_TXT.primary[r.primary]}</p><p><b>Secundair (${MISSION_PTS.secondary} pt):</b> ${MISSION_TXT.secondary[r.secondary]} <span class="dim">Alleen actief als de eventkaart Mothership Commo. is getrokken.</span></p><p>Na het primaire doel moeten de overlevende Marines terug naar hun docking claw. Haal je het doel niet, dan krijgt de Alien de punten.</p><p class="dim">Marines verdienen punten voor alien-tokens; gesneuvelde Marines kosten 5 punten (10 bij zwaar wapen/Commander).</p>`;
+  const r = G.mission.rules, b = BRIEF[G.mid];
+  return `<h3>Missie ${G.mid}</h3>${b ? `<p class="dim"><b>${esc(b[0])}</b></p><p>${esc(b[1])}</p>` : ''}<p><b>Primair (${MISSION_PTS.primary} pt):</b> ${MISSION_TXT.primary[r.primary]}</p><p><b>Secundair (${MISSION_PTS.secondary} pt):</b> ${MISSION_TXT.secondary[r.secondary]} <span class="dim">Alleen actief als de eventkaart Mothership Commo. is getrokken.</span></p><p>Na het primaire doel moeten de overlevende Marines terug naar hun docking claw. Haal je het doel niet, dan krijgt de Alien de punten.</p><p class="dim">Marines verdienen punten voor alien-tokens; gesneuvelde Marines kosten 5 punten (10 bij zwaar wapen/Commander).</p>`;
 }
 async function showEnd() {
+  clearSave();
   const ps = G.players.slice().sort((a, b) => b.points - a.points);
   let h = `<h3>Einde missie</h3><p>${esc(G.endMsg || '')}</p><table class="tb"><tr><th>Speler</th><th>Punten</th><th>Gesneuveld</th></tr>`;
   for (const p of ps) h += `<tr><td style="color:${p.color}">${esc(p.name)}</td><td>${p.points}</td><td>${p.casualties}</td></tr>`;
   h += `</table><p>Alien: ${G.aScore} punten.</p>`;
   if (G.camp) h += '<div class="sec">Campagne</div>' + campFinish().map(l => `<p class="small">${esc(l)}</p>`).join('');
-  const v = await modal(h, [['Nieuwe missie', 'new', ''], ['Bord bekijken', 'view', 'sec']]);
+  let nx = 0;
+  if (CAMP.data.on && G.camp) { nx = G.mid < 6 ? G.mid + 1 : 1; CAMP.data.next = nx; campSave(); CFG.mission = nx; }
+  const v = await modal(h, nx ? [[`Volgende missie (${nx})`, 'new', ''], ['Bord bekijken', 'view', 'sec']] : [['Nieuwe missie', 'new', ''], ['Bord bekijken', 'view', 'sec']]);
   if (v === 'new') showSetup();
 }
 
@@ -2303,7 +2322,10 @@ function campPanel() {
   return h;
 }
 function renderSetup() {
-  let h = '<h1>Missiebord</h1>' + campPanel() + '<div class="sec">Missie</div><div class="row wrap">';
+  let h = '<h1>Missiebord</h1>';
+  const sm = hasSave() ? saveMeta() : null;
+  if (sm) h += `<div class="card"><h3>Missie in uitvoering</h3><div class="small">Missie ${sm.mid} · ronde ${sm.round} · ${esc((sm.players || []).join(', '))}</div><div class="row"><button class="big" style="margin:8px 0 0;flex:1" data-s="resume">Doorgaan</button><button class="small sec" data-s="delsave">Wissen</button></div></div>`;
+  h += campPanel() + '<div class="sec">Missie</div><div class="row wrap">';
   for (let i = 1; i <= 6; i++) h += `<button class="${CFG.mission === i ? 'on' : ''}" data-s="mission" data-v="${i}">${i}</button>`;
   const r = MISSIONS[CFG.mission].rules;
   h += `</div><div class="card small"><b>Primair:</b> ${MISSION_TXT.primary[r.primary]}<br><b>Secundair:</b> ${MISSION_TXT.secondary[r.secondary]}</div>`;
@@ -2352,6 +2374,8 @@ function renderSetup() {
 async function onSetup(ev) {
   const el = ev.target.closest('[data-s]'); if (!el) return;
   const s = el.dataset.s, p = +el.dataset.p, j = +el.dataset.j, v = el.dataset.v ?? el.value;
+  if (s === 'resume') return void resumeGame();
+  if (s === 'delsave') { clearSave(); renderSetup(); return; }
   if (s === 'mission') CFG.mission = +v;
   else if (s === 'n') CFG.n = +v;
   else if (s === 'camp') { CAMP.data.on = !CAMP.data.on; campSave(); }
@@ -2381,7 +2405,7 @@ async function startGame() {
     const eqIdx = c.eqIdx.slice().sort((a, b) => a - b);
     return { chapter: c.chapter, name: CHAPTER_NAME[c.chapter], cmdr: c.cmdr, marines: c.marines.slice(), equip: eqIdx.map(j => cc.equip[j]), orders: c.orders.slice().sort().map(j => cc.order[j]), targeter: c.targeter.slice() };
   });
-  setupGame(CFG.mission, cfgs, ASSETS);
+  clearSave(); setupGame(CFG.mission, cfgs, ASSETS);
   cfgs.forEach((c, i) => { if (c.ai) G.players[i].ai = { diff: c.ai }; });
   G.fast = false; applyCampaignToGame();
   $('setup').classList.add('hidden'); $('game').classList.remove('hidden');
@@ -2418,9 +2442,141 @@ window.addEventListener('DOMContentLoaded', () => {
     else if (a === 'view') setTilt(!TILT);
     else if (a === 'mission') modal(missionInfo(), [['Sluiten', 1]]);
   });
-  $('menu').onclick = async () => { const v = await modal('<h3>Menu</h3>', [['Verder spelen', 0], ['Stop missie', 1, 'sec']]); if (v === 1) showSetup(); };
+  $('menu').onclick = async () => {
+    if (!G) return;
+    if (G.over) { showSetup(); return; }
+    if (G.busy || G.turn.phase !== 'marine') { toast('Wacht tot de beurt van de computer klaar is.'); return; }
+    const v = await modal('<h3>Menu</h3><p class="dim small">Met "Opslaan en naar menu" kun je later verdergaan waar je gebleven was.</p>', [['Verder spelen', 0], ['Opslaan en naar menu', 2], ['Stop missie (wissen)', 1, 'sec']]);
+    if (v === 2) { clearTimeout(_saveT); if (saveNow()) showSetup(); else toast('Opslaan lukte niet.'); }
+    else if (v === 1) { const r = await modal('<h3>Missie stoppen?</h3><p>De voortgang van deze missie gaat verloren.</p>', [['Annuleren', 0, 'sec'], ['Stoppen', 1]]); if (r) { clearSave(); showSetup(); } }
+  };
+  campLoad(); if (CAMP.data.on && CAMP.data.next) CFG.mission = CAMP.data.next;
   showSetup();
 });
+
+/* ---------- Briefings (Mission Book 2) ---------- */
+const BRIEF = {
+  1: ['Sector 57 — Seek and Destroy', 'Beta Squad, Alpha Company, is uitgeschakeld door een Dreadnought aan boord van Alien Vessel 547, codenaam Abomination, tijdens een poging de sector te zuiveren. Spoor de Dreadnought op en vernietig hem.', 'Secundair: de vijand heeft een Verkenningsandroid ingezet. Zoek hem en schakel hem uit.'],
+  2: ['Sector 58 — Clearing Action', 'Sector 57 is gezuiverd; ga door naar sector 58. De alienmacht hier staat onder bevel van een Chaos Commander. Vind hem en schakel hem uit. Alle andere aliens moeten worden aangevallen en vernietigd.', 'Secundair: volgens de inlichtingen worden Chaos Space Marines met zware wapens ingezet. Zoek en vernietig ze.'],
+  3: ['Sector 105 — Interception', 'In sector 105 is een grote alienmacht in beweging gedetecteerd. Onderschep en vernietig ze voordat ze de alienperimeter kunnen versterken.', 'Secundair: de vijand heeft een Dreadnought ingezet en die moet worden uitgeschakeld. Je mag het Dreadnought-versterkingstoken aan je versterkingspool toevoegen.'],
+  4: ['Sector 112 — Diversionary Action', 'Sector 734 moet worden gezuiverd van aliens. Daar komt een hoofdaanval; in sector 112 volgt een afleidingsaanval. Houd de verliezen laag: je squads moeten na de afleiding de hoofdaanval versterken.', 'Secundair: afleiding geslaagd. Alle Marines keren terug naar de docking claws.'],
+  5: ['Sector 734 — Clearing Up', 'Sector 734 is ingenomen, maar een kleine groep Orks en Gretchins is achtergebleven. Zoek ze en vernietig ze. Mogelijk zijn er Chaos Space Marines bij.', 'Secundair: de aliens bouwen een teleporter om meer troepen naar deze zone van de perimeter te brengen. Hij staat in de oude Machine Rooms. Vind hem en vernietig hem.'],
+  6: ['Sector 734 — Chaos Marines', 'Twee squads Chaos Space Marines hebben deze sector aangevallen. Ze moeten worden uitgeschakeld.', 'Secundair: een van de Chaos Marine Commanders probeert versterking op te roepen. Schakel hem uit voordat het hem lukt.'],
+};
+
+/* ---------- Opslaan / hervatten ---------- */
+const SAVE_KEY = 'mb_save';
+function serG(root) {
+  const ids = new Map(), out = [], skip = { assets: 1, mission: 1, occ: 1 };
+  const enc = v => {
+    if (v === null || typeof v === 'boolean' || typeof v === 'string') return v;
+    if (typeof v === 'number') return Number.isFinite(v) ? v : { n: String(v) };
+    if (v === undefined || typeof v === 'function' || (typeof Node !== 'undefined' && v instanceof Node)) return { u: 1 };
+    if (ids.has(v)) return { r: ids.get(v) };
+    const id = out.length; ids.set(v, id); out.push(null);
+    let rec;
+    if (Array.isArray(v)) rec = { t: 'a', v: v.map(enc) };
+    else if (v instanceof Set) rec = { t: 's', v: [...v].map(enc) };
+    else if (v instanceof Map) rec = { t: 'm', v: [...v].map(([k, x]) => [enc(k), enc(x)]) };
+    else { const o = {}; for (const k of Object.keys(v)) { if (k[0] === '_') continue; o[k] = enc(v[k]); } rec = { t: 'o', v: o }; }
+    out[id] = rec; return { r: id };
+  };
+  const root2 = {}; for (const k of Object.keys(root)) if (!skip[k]) root2[k] = enc(root[k]);
+  return { objs: out, root: root2 };
+}
+function desG(s) {
+  const C = s.objs.map(r => r.t === 'a' ? [] : r.t === 's' ? new Set() : r.t === 'm' ? new Map() : {});
+  const dec = v => {
+    if (v === null || typeof v !== 'object') return v;
+    if ('r' in v) return C[v.r]; if ('u' in v) return undefined; if ('n' in v) return Number(v.n); return v;
+  };
+  s.objs.forEach((r, i) => {
+    const c = C[i];
+    if (r.t === 'a') r.v.forEach(x => c.push(dec(x)));
+    else if (r.t === 's') r.v.forEach(x => c.add(dec(x)));
+    else if (r.t === 'm') r.v.forEach(([k, x]) => c.set(dec(k), dec(x)));
+    else for (const k of Object.keys(r.v)) c[k] = dec(r.v[k]);
+  });
+  const g = {}; for (const k of Object.keys(s.root)) g[k] = dec(s.root[k]);
+  return g;
+}
+function hasSave() { try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; } }
+function saveMeta() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.meta; } catch (e) { return null; } }
+function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } }
+function saveNow() {
+  if (!G || G.over || G.busy || G.turn.phase !== 'marine') return false;
+  try {
+    const s = serG(G);
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, uid: UID, tid: TID, g: s, meta: { mid: G.mid, round: G.round, players: G.players.map(p => p.name), t: Date.now() } }));
+    return true;
+  } catch (e) { return false; }
+}
+let _saveT = null;
+function autosaveSoon() {
+  if (!G || G.over || G.busy) return;
+  const m = $('modal'); if (m && !m.classList.contains('hidden')) return;
+  clearTimeout(_saveT); _saveT = setTimeout(saveNow, 400);
+}
+async function resumeGame() {
+  try {
+    const sv = JSON.parse(localStorage.getItem(SAVE_KEY)); if (!sv || sv.v !== 1) throw 0;
+    const g = desG(sv.g);
+    g.mission = MISSIONS[g.mid]; g.assets = ASSETS; g.busy = false; g.aiRun = false; g.fast = false;
+    G = g; UID = sv.uid; TID = sv.tid; rebuildOcc();
+  } catch (e) { G = null; clearSave(); toast('Opgeslagen missie kon niet worden geladen.'); renderSetup(); return; }
+  $('setup').classList.add('hidden'); $('game').classList.remove('hidden');
+  await loadImages(ASSETS);
+  clearSel(); S.info = null; initView(); setBanner(); renderPanel(); draw();
+}
+
+/* ---------- Vloeiende beweging ---------- */
+async function glide(u, x1, y1, ms) {
+  if (!G || G.fast || !ms) return;
+  const x0 = u.x, y0 = u.y, t0 = performance.now();
+  await new Promise(res => {
+    const step = () => {
+      const k = Math.min(1, (performance.now() - t0) / ms);
+      u.gx = x0 + (x1 - x0) * k; u.gy = y0 + (y1 - y0) * k - Math.sin(Math.PI * k) * .08;
+      draw();
+      if (k < 1) setTimeout(step, 16); else res();
+    };
+    step();
+  });
+  u.gx = u.gy = undefined;
+}
+
+/* ---------- Dobbelstenen ---------- */
+function rollFx(rolls) {
+  const box = $('dicefx');
+  if (!G || G.fast || !box) return Promise.resolve();
+  const fast = !!G.aiRun || G.turn.phase !== 'marine', k = fast ? .6 : 1;
+  return new Promise(res => {
+    let done = false; const timers = [];
+    const fin = () => { if (done) return; done = true; timers.forEach(clearTimeout); timers.forEach(clearInterval); box.classList.add('hidden'); box.innerHTML = ''; box.onclick = null; res(); };
+    box.innerHTML = '';
+    rolls.forEach((r, ri) => {
+      const row = document.createElement('div'); row.className = 'drow';
+      row.innerHTML = `<div class="dlab">${esc(r.who)} — ${esc(r.label)}</div><div class="dd"></div><div class="dtot"></div>`;
+      const dd = row.querySelector('.dd'), els = [];
+      r.dice.forEach((v, i) => {
+        const el = document.createElement('div'); el.className = 'dx' + (r.types && r.types[i] === 'H' ? ' red' : ''); el.textContent = '?'; dd.appendChild(el); els.push(el);
+        const dur = (650 + i * 110) * k, max = (r.types && r.types[i] === 'H') ? 3 : 2;
+        const dir = (i + ri) % 2 ? 1 : -1;
+        el.animate([
+          { transform: `translate(${dir * 220}px,-90px) perspective(400px) rotateX(540deg) rotateY(${dir * 360}deg) scale(.5)`, opacity: 0 },
+          { transform: 'translate(0,0) perspective(400px) rotateX(0) rotateY(0) scale(1.08)', opacity: 1, offset: .62 },
+          { transform: 'translate(0,-16px) scale(1)', offset: .78 },
+          { transform: 'translate(0,0) scale(1)' }], { duration: dur, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
+        const iv = setInterval(() => { el.textContent = rnd(max + 1); }, 70); timers.push(iv);
+        timers.push(setTimeout(() => { clearInterval(iv); el.textContent = v; el.classList.add('set'); }, dur * .8));
+      });
+      const tot = row.querySelector('.dtot'); timers.push(setTimeout(() => { tot.textContent = '= ' + sum(r.dice); }, (650 + r.dice.length * 110) * k));
+      box.appendChild(row);
+    });
+    box.classList.remove('hidden'); box.onclick = fin;
+    timers.push(setTimeout(fin, (650 + 4 * 110 + (fast ? 450 : 850)) * k));
+  });
+}
 
 </script>
 <script>if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
