@@ -28,6 +28,8 @@ button.act{width:100%;min-height:64px;font-size:14px;padding:4px 2px;font-weight
 button.act .ai{font-size:24px;line-height:1}button.act.on{background:#f2bd2a;color:#10130d;border-color:#ffe08a;box-shadow:0 0 0 3px #f2bd2a55}
 button.act:disabled{background:#262b33;border-color:#3a414c;color:#6b7482}button.act.wide{margin:4px 0;min-height:44px;flex-direction:row;justify-content:center}
 .aw{font-size:11px;color:#c9a14a;text-align:center;min-height:14px;margin-top:2px}
+#lang{display:none;position:fixed;top:8px;left:8px;z-index:50;font:700 12px sans-serif;color:#cfd8e6;background:#1b2230;border:1px solid #3a4658;border-radius:6px;padding:4px 8px;text-decoration:none;opacity:.8}
+#setup:not(.hidden)~#lang{display:block}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row button{flex:0 0 auto}
 .lbl{margin:10px 0 4px;font-size:12px;color:#9aa5b8;text-transform:uppercase;letter-spacing:.06em}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chip{padding:8px 10px;min-height:40px;font-size:14px}.chip.used{text-decoration:line-through}
@@ -79,7 +81,7 @@ button.card.opt{margin:0;padding:8px 10px;min-height:0}button.card.opt.on{backgr
 button.card.eq{margin:4px 0;padding:8px 10px;min-height:0}button.card.eq.used{opacity:.5}
 .wpl{margin:6px 0;font-size:12.5px;color:#aab4c4;line-height:1.4}.wpl div{margin:2px 0}
 </style></head><body>
-<div id="setup" class="screen"></div>
+<div id="setup" class="screen"></div><a id="lang" href="en.html">EN</a>
 <div id="game" class="screen hidden">
  <div id="boardwrap"><div id="scroller"><canvas id="cv"></canvas></div>
   <div id="dicefx" class="hidden"></div>
@@ -130,7 +132,7 @@ const MARINE_WP = {
   pg: { name: 'Plasma Gun', lab: 'PG', mv: 4, fire: ['H', 'H'], style: 'pg', heavy: true },
 };
 const CMDR_SETS = {
-  axe:   { name: 'Powerzwaard? Nee: Power Axe + Bolt Pistol', fire: ['L', 'L'], hth: ['H', 'H'], style: 'single' },
+  axe:   { name: 'Power Axe + Bolt Pistol', fire: ['L', 'L'], hth: ['H', 'H'], style: 'single' },
   glove: { name: 'Power Glove + Power Sword', fire: [], hth: ['H', 'H', 'L', 'L'], style: 'single' },
   hb:    { name: 'Heavy Bolter', fire: ['H', 'H'], hth: ['L', 'L'], style: 'single' },
 };
