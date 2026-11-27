@@ -1,0 +1,68 @@
+FIGUREN – zo vervang je een figuur
+===================================
+Zet een PNG met transparante achtergrond in deze map, met exact de bestandsnaam hieronder.
+Ontbreekt een bestand, dan toont de app het standaard silhouet.
+Sokkel en voetpunt worden automatisch herkend; alle figuren staan op een sokkel, camera ~35 graden van boven.
+Aanbevolen: 400 px breed.
+
+MARINES (kapittel: um = Ultramarines, ba = Blood Angels, if = Imperial Fists)
+  um_bolter  um_ac  um_ml  um_pg
+  um_commander_axe  um_commander_glove  um_commander_hb
+  (zelfde met ba_ en if_)
+
+ALIENS
+  ork  gretchin  android  csm  csm_heavy  chaos_commander  genestealer
+
+DREADNOUGHT (per wapencombinatie; "dreadnought.png" is de terugval)
+  dreadnought_pg_ac  dreadnought_pg_ml  dreadnought_ml_ac  dreadnought
+
+
+ORK- EN GRETCHIN-VARIANTEN (puur cosmetisch, optioneel; 2 van elk in de doos)
+  ork_a ork_b ork_c ork_d
+  gretchin_a gretchin_b gretchin_c gretchin_d gretchin_e gretchin_f
+  Ontbreekt een variant, dan wordt ork.png / gretchin.png of het silhouet gebruikt.
+
+
+UITBREIDINGEN (nog niet in het spel; je kan de figuren alvast klaarzetten)
+Formaat zoals alle andere: 400x400 px, transparant, figuur onderaan, kijkhoek zoals de rest.
+Heb je een figuur niet, dan gebruikt het spel een silhouet of een gelijkaardige figuur.
+
+MISSION DREADNOUGHT
+  Extra-zware marine-wapens, per chapter (um / ba / if), 3 wapens = 9 afbeeldingen:
+    um_lascannon  um_fusion  um_conversion
+    ba_lascannon  ba_fusion  ba_conversion
+    if_lascannon  if_fusion  if_conversion
+  Tarantula (ondersteuningswapen, 3 vakken lang) met schutter, per chapter:
+    um_tarantula_zij   um_tarantula_voor   um_gunner
+    ba_tarantula_zij   ba_tarantula_voor   ba_gunner
+    if_tarantula_zij   if_tarantula_voor   if_gunner
+    zij  = tarantula van opzij, kijkend naar rechts (het spel spiegelt voor links)
+    voor = tarantula van voren gezien, kijkend naar de speler (het spel gebruikt hem ook voor achterwaarts)
+    gunner = marine met de Control Console
+  Dreadnoughts (4 klassen), eventueel met de wapens erop zoals je ze gebouwd hebt:
+    dreadnought_vii   (Mark VII, Malevolent: 4 vakken, 2 wapens)
+    dreadnought_viii  (Mark VIII, Dominator: 4 vakken, 4 wapens)
+    dreadnought_ix    (Mark IX, Marauder: 6 vakken, 2 wapens)
+    dreadnought_x     (Mark X, Abomination: 6 vakken, 4 wapens)
+    Wil je per wapencombinatie een aparte figuur, laat het me weten, dan maken we een naamschema.
+  Androids: de bestaande android.png volstaat.
+
+ELDAR ATTACK
+  eld_catapult   Eldar Warrior met Shuriken Catapult
+  eld_sc         Eldar Warrior met Shuriken Cannon
+  eld_ml         Eldar Warrior met Missile Launcher
+  eld_lc         Eldar Warrior met Las-Cannon
+  eld_exarch     Eldar Exarch (Force Sword + Shuriken Pistol)
+  De Psychic Screen en Force Wall haal ik uit je scan van de kartonnen stukken; daar is geen figuur voor nodig.
+  Decoy- en Equipment-tokens komen uit je scans van de blip-tokens.
+
+Na het uploaden naar GitHub: open de app online en herlaad één keer;
+de service worker haalt de nieuwe bestanden dan voor offline gebruik binnen.
+
+TELEPORTER (missie 5)
+Eigen miniatuur/token: zet een transparante png (400x400, zoals de andere figuren, mét sokkel/ondergrond) als figuren/teleporter.png.
+De app tekent hem op het 2x2-vak zodra de eventkaart "Mothership Commo." is getrokken. Zonder bestand toont de app een blauw vak met het woord TELEPORTER.
+Vernietigen: een Marine in de Machinekamer schiet erop; minstens 1 geslaagde dobbelsteen = vernietigd.
+Vernield: figuren/teleporter_destroyed.png (optioneel, wordt getoond na vernietiging).
+
+EQUIPMENT-TOKENS: figuren/equipment_runic.png (missie 7, Eldar runewapens) en figuren/equipment_nav.png (missie 10, navigatiecomputer); 400x400 transparant. figuren/equipment.png is de algemene reserve. Zonder bestand: gele E-tegel.
