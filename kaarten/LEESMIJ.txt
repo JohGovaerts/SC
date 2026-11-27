@@ -1,0 +1,118 @@
+KAARTEN - LEESMIJ
+=================
+
+Zet hier je eigen kaartafbeeldingen. Een bestand met dezelfde naam vervangt het bestaande.
+Ontbreekt een bestand, dan toont het spel de kaart gewoon als tekst.
+
+FORMAAT
+  Staand, verhouding 240:345 (bijv. 240x345 of 480x690), JPG. Hoeken rond ik af in het spel.
+
+ALIEN EVENT KAARTEN (voorkant) + de gemeenschappelijke achterkant
+  ev_back.jpg   achterkant, voor alle eventkaarten (wordt omgedraaid bij het trekken)
+  ev_jammed.jpg           Weapons Jammed
+  ev_genestealer.jpg      Genestealer
+  ev_suicide.jpg          Suicide Android
+  ev_master.jpg           Master Controls
+  ev_auto_c.jpg           Auto-Defence
+  ev_auto_r.jpg           Auto-Defence
+  ev_neworders.jpg        New Orders
+  ev_elite.jpg            Alien Elite
+  ev_frenzy.jpg           Frenzy!
+  ev_redeploy.jpg         Re-Deploy
+  ev_commo.jpg            Mothership Commo.
+  ev_ammo.jpg             Out of Ammo
+  ev_equipmal.jpg         Equipment Malfunction
+  ev_reportin.jpg         Report In
+  ev_booby.jpg            Booby Trap
+  ev_battleplan.jpg       Battle Plan
+  ev_comms.jpg            Communications Malfunction
+  ev_mech.jpg             Mech. Assault
+  ev_mekaniak.jpg         Ork Mekaniak
+  ev_psychic.jpg          Psychic Attack
+  ev_taskforce.jpg        Alien Task Force
+  ev_teleporter.jpg       Alien Teleporter
+  ev_scan.jpg             Mothership Scan
+  ev_bomber.jpg           Gretchin Bomber
+  ev_androidfault.jpg     Android Fault
+  ev_lure.jpg             Lure of Chaos
+
+ORDER- EN EQUIPMENTKAARTEN PER CHAPTER
+  <chapter>_<kaart>_f.jpg = voorkant (afbeelding)
+  <chapter>_<kaart>_b.jpg = achterkant (regeltekst)
+  Eén afbeelding per kaartsoort volstaat: twee Targeters gebruiken dezelfde.
+
+UM - Ultramarines
+  UM_close_assault_f.jpg          Close Assault! (order, voor)
+  UM_close_assault_b.jpg          Close Assault! (order, achter)
+  UM_by_sections_f.jpg            By Sections! (order, voor)
+  UM_by_sections_b.jpg            By Sections! (order, achter)
+  UM_move_it_f.jpg                Move It! (order, voor)
+  UM_move_it_b.jpg                Move It! (order, achter)
+  UM_fire_f.jpg                   Fire! (order, voor)
+  UM_fire_b.jpg                   Fire! (order, achter)
+  UM_targeter_f.jpg               Targeter (equipment, voor)
+  UM_targeter_b.jpg               Targeter (equipment, achter)
+  UM_medikit_f.jpg                Medi-kit (equipment, voor)
+  UM_medikit_b.jpg                Medi-kit (equipment, achter)
+  UM_bolt_pistols_f.jpg           Bolt Pistols (equipment, voor)
+  UM_bolt_pistols_b.jpg           Bolt Pistols (equipment, achter)
+  UM_digital_f.jpg                Digital Weapons (equipment, voor)
+  UM_digital_b.jpg                Digital Weapons (equipment, achter)
+  UM_blind_f.jpg                  Blind Grenades (equipment, voor)
+  UM_blind_b.jpg                  Blind Grenades (equipment, achter)
+  UM_bioscan_f.jpg                Bio-Scanner (equipment, voor)
+  UM_bioscan_b.jpg                Bio-Scanner (equipment, achter)
+  UM_melta_f.jpg                  Melta Bomb (equipment, voor)
+  UM_melta_b.jpg                  Melta Bomb (equipment, achter)
+
+BA - Blood Angels
+  BA_close_assault_f.jpg          Close Assault! (order, voor)
+  BA_close_assault_b.jpg          Close Assault! (order, achter)
+  BA_blades_f.jpg                 Close Assault Blades (order, voor)
+  BA_blades_b.jpg                 Close Assault Blades (order, achter)
+  BA_fire_f.jpg                   Fire! (order, voor)
+  BA_fire_b.jpg                   Fire! (order, achter)
+  BA_move_it_f.jpg                Move It! (order, voor)
+  BA_move_it_b.jpg                Move It! (order, achter)
+  BA_photon_f.jpg                 Photon Grenades (equipment, voor)
+  BA_photon_b.jpg                 Photon Grenades (equipment, achter)
+  BA_targeter_f.jpg               Targeter (equipment, voor)
+  BA_targeter_b.jpg               Targeter (equipment, achter)
+  BA_melta_f.jpg                  Melta Bomb (equipment, voor)
+  BA_melta_b.jpg                  Melta Bomb (equipment, achter)
+  BA_blind_f.jpg                  Blind Grenades (equipment, voor)
+  BA_blind_b.jpg                  Blind Grenades (equipment, achter)
+  BA_bolt_pistols_f.jpg           Bolt Pistols (equipment, voor)
+  BA_bolt_pistols_b.jpg           Bolt Pistols (equipment, achter)
+  BA_forcefield_f.jpg             Force Field (equipment, voor)
+  BA_forcefield_b.jpg             Force Field (equipment, achter)
+  BA_bionic_arm_f.jpg             Bionic Arm (equipment, voor)
+  BA_bionic_arm_b.jpg             Bionic Arm (equipment, achter)
+
+IF - Imperial Fists
+  IF_fire_f.jpg                   Fire! (order, voor)
+  IF_fire_b.jpg                   Fire! (order, achter)
+  IF_heavy_weapon_f.jpg           Heavy Weapon! (order, voor)
+  IF_heavy_weapon_b.jpg           Heavy Weapon! (order, achter)
+  IF_move_it_f.jpg                Move It! (order, voor)
+  IF_move_it_b.jpg                Move It! (order, achter)
+  IF_by_sections_f.jpg            By Sections! (order, voor)
+  IF_by_sections_b.jpg            By Sections! (order, achter)
+  IF_blind_f.jpg                  Blind Grenades (equipment, voor)
+  IF_blind_b.jpg                  Blind Grenades (equipment, achter)
+  IF_combi_f.jpg                  Combi-weapon (equipment, voor)
+  IF_combi_b.jpg                  Combi-weapon (equipment, achter)
+  IF_bionic_eye_f.jpg             Bionic Eye (equipment, voor)
+  IF_bionic_eye_b.jpg             Bionic Eye (equipment, achter)
+  IF_targeter_f.jpg               Targeter (equipment, voor)
+  IF_targeter_b.jpg               Targeter (equipment, achter)
+  IF_melta_f.jpg                  Melta Bomb (equipment, voor)
+  IF_melta_b.jpg                  Melta Bomb (equipment, achter)
+  IF_bolt_pistols_f.jpg           Bolt Pistols (equipment, voor)
+  IF_bolt_pistols_b.jpg           Bolt Pistols (equipment, achter)
+  IF_suspensors_f.jpg             Suspensors (equipment, voor)
+  IF_suspensors_b.jpg             Suspensors (equipment, achter)
+
+NA HET UPLOADEN
+  Vervang je alleen bestaande bestanden, dan werkt het meteen na een keer online herladen.
+  Voeg je een nieuwe bestandsnaam toe, dan werkt die online meteen, maar offline pas na mijn volgende build.
