@@ -1,6 +1,6 @@
 {
- "name": "Missiebord",
- "short_name": "Missiebord",
+ "name": "Mission Board",
+ "short_name": "Mission Board",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
