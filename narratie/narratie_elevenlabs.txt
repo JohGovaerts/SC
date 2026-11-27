@@ -1,0 +1,51 @@
+ELEVENLABS SCRIPTS — original Mission Book 2 and Eldar Attack wording, for model Eleven v3 (audio tags in [brackets], pauses via ... and [pause]).
+Save each result under the name shown in narratie/. Missions 1-6: Mission Book 2 (547/2 to 547/7). Missions 7-10: Eldar Attack.
+
+--- mission1.mp3 (briefing at mission start) ---
+[deep voice] Sector 57... [pause] Seek and Destroy. [long pause] [grimly] Beta Squad, Alpha Company, has been wiped out by a Dreadnought aboard Alien Vessel 547... code-name... [dramatically] Abomination... [pause] whilst trying to clear the Sector. [firmly] You must seek out the Dreadnought, and DESTROY it.
+
+--- mission1_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secondary mission. The enemy have deployed a Reconnaissance Android. [pause] Locate... and eliminate it.
+
+--- mission2.mp3 (briefing at mission start) ---
+[deep voice] Sector 58... [pause] Clearing Action. [long pause] [calmly] Sector 57 has been cleared. Proceed to sector 58. [grimly] Alien forces here are known to be under the command of a Chaos Commander. [pause] [firmly] Locate the Chaos Commander, and eliminate him. All other aliens must be engaged... and destroyed.
+
+--- mission2_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secondary mission. Intelligence has shown that there are Chaos Space Marine heavy weapons being deployed. [pause] Locate... and destroy.
+
+--- mission3.mp3 (briefing at mission start) ---
+[deep voice] Sector 105... [pause] Interception. [long pause] [urgently] Aliens have been detected in force, moving through Sector 105. [firmly] Intercept and destroy... before they can reinforce the alien perimeter.
+
+--- mission3_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secondary mission. The enemy have deployed a Dreadnought. [pause] [grimly] It must be eliminated.
+
+--- mission4.mp3 (briefing at mission start) ---
+[deep voice] Sector 112... [pause] Diversionary Action. [long pause] [calmly] Sector 734 must be cleared of aliens. A main assault is to be placed into this sector. [pause] A diversionary attack is to be made into sector 112. [firmly] Casualties must be kept low. Your squads will be required to reinforce the main assault... after the diversion.
+
+--- mission4_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secondary mission. Diversion accomplished. [pause] All Marines... to re-board the docking arms.
+
+--- mission5.mp3 (briefing at mission start) ---
+[deep voice] Sector 734... [pause] Clearing Up. [long pause] [calmly] Sector 734 has been taken. [cautiously] However... a small band of Orks and Gretchin are left. [firmly] Locate... and destroy. [pause] [ominously] They may have Chaos Space Marines with them.
+
+--- mission5_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secondary mission. The aliens are building a teleporter, to bring more forces into this part of the perimeter. It is located in the old Machine rooms. [pause] Locate... and destroy.
+
+--- mission6.mp3 (briefing at mission start) ---
+[deep voice] Sector 734... [pause] Chaos Marines. [long pause] [grimly] Two Chaos Space Marine squads have attacked this sector. [pause] [firmly] They must be eliminated.
+
+--- mission6_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secondary mission. One of the Chaos Marine Commanders is attempting to call in reinforcements. [pause] [urgently] Eliminate him... before he can do so.
+
+--- mission7.mp3 ---
+[softly] [mysterious tone] Eldar Attack One. [pause] Sector 66... Retrieval. [long pause] [slowly] The remains of a lost squad of Eldar Warriors have been detected by our psi scanners... in sector 66 of Space Hulk, code name... [dramatically] Denubius. [pause] [firmly] You must enter this hulk, locate any Eldar Runic weapons hidden therein... and return them to the Craftworld.
+
+--- mission8.mp3 ---
+[softly] [mysterious tone] Eldar Attack Two. [pause] Sector 357... Retreat Through Enemy Lines. [long pause] [slowly] During your mission, a warp storm has disrupted your Psychic Screen. [pause] Craftworld Saim-hann has generated a new screen, but it can only be projected into the next sector. [urgently] You must fight your way through growing Alien forces... to the new Psychic Screen.
+
+--- mission9.mp3 ---
+[softly] [mysterious tone] Eldar Attack Three. [pause] Sector 391... Search and Destroy. [long pause] [slowly] Our Pre-Cognitive Psychics have predicted the appearance of a Warp Entity... which takes over intelligent machines. [pause] [ominously] These are aboard a Space Hulk, travelling towards populated space. [firmly] You must board this Hulk, and neutralise the creature before it grows... by destroying any Androids or Dreadnoughts on board.
+
+--- mission10.mp3 ---
+[softly] [mysterious tone] Eldar Attack Four. [pause] Sector 99... Warp Tunnel Navigation Computer. [long pause] [slowly] An ancient and invaluable warp tunnel navigational computer has been detected on board Space Hulk 669, code name... [dramatically] Demonicus. [pause] [warmly] This technology will provide its captors with a great advantage... the ability to reveal long forgotten warp tunnels... and bring great honour to those who capture it. [firmly] You must be the first to find this computer... and return safely with it.
+

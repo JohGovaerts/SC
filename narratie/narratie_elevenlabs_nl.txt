@@ -1,0 +1,51 @@
+ELEVENLABS SCRIPTS (Nederlands/Vlaams) — voor model Eleven v3. Opslaan als narratie/nl/mission<N>.mp3
+Missie 1-6: naar Mission Book 2; missie 7-10: naar Eldar Attack (eigen vertaling).
+
+--- mission1.mp3 (briefing at mission start) ---
+[deep voice] Sector 57... [pause] Zoeken en vernietigen. [long pause] [grimly] Beta Squad, Alpha Company, is uitgeschakeld door een Dreadnought aan boord van Alien Vessel 547, codenaam... [dramatically] Abomination... [pause] tijdens een poging de sector te zuiveren. [firmly] U moet de Dreadnought opsporen... en VERNIETIGEN.
+
+--- mission1_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secundaire missie. De vijand heeft een verkenningsandroid ingezet. [pause] Spoor hem op... en schakel hem uit.
+
+--- mission2.mp3 (briefing at mission start) ---
+[deep voice] Sector 58... [pause] Zuiveringsactie. [long pause] [calmly] Sector 57 is gezuiverd. Rukt u op naar sector 58. [grimly] De alienmacht hier staat onder bevel van een Chaos Commander. [pause] [firmly] Spoor de Chaos Commander op... en schakel hem uit. Alle andere aliens moeten worden aangevallen... en vernietigd.
+
+--- mission2_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secundaire missie. Volgens onze inlichtingen worden Chaos Space Marines met zware wapens ingezet. [pause] Spoor ze op... en vernietig ze.
+
+--- mission3.mp3 (briefing at mission start) ---
+[deep voice] Sector 105... [pause] Onderschepping. [long pause] [urgently] In sector 105 is een grote alienmacht in beweging gedetecteerd. [firmly] Onderschep en vernietig ze... voor ze de alienperimeter kunnen versterken.
+
+--- mission3_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secundaire missie. De vijand heeft een Dreadnought ingezet. [pause] [grimly] Hij moet worden uitgeschakeld.
+
+--- mission4.mp3 (briefing at mission start) ---
+[deep voice] Sector 112... [pause] Afleidingsmanoeuvre. [long pause] [calmly] Sector 734 moet worden gezuiverd van aliens. Daar komt een hoofdaanval. [pause] In sector 112 volgt een afleidingsaanval. [firmly] Houd de verliezen laag. Uw squads moeten na de afleiding de hoofdaanval versterken.
+
+--- mission4_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secundaire missie. Afleiding geslaagd. [pause] Alle Marines... terug naar de docking claws.
+
+--- mission5.mp3 (briefing at mission start) ---
+[deep voice] Sector 734... [pause] Opruimen. [long pause] [calmly] Sector 734 is ingenomen. [cautiously] Maar... er is een kleine groep Orks en Gretchins achtergebleven. [firmly] Spoor ze op... en vernietig ze. [pause] [ominously] Mogelijk zijn er Chaos Space Marines bij.
+
+--- mission5_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secundaire missie. De aliens bouwen een teleporter om meer troepen naar dit deel van de perimeter te brengen. Hij staat in de oude machinekamers. [pause] Spoor hem op... en vernietig hem.
+
+--- mission6.mp3 (briefing at mission start) ---
+[deep voice] Sector 734... [pause] Chaos Marines. [long pause] [grimly] Twee squads Chaos Space Marines hebben deze sector aangevallen. [pause] [firmly] Ze moeten worden uitgeschakeld.
+
+--- mission6_secondary.mp3 (played when the Mothership Commo. card is drawn) ---
+[calmly] Secundaire missie. Een van de Chaos Marine Commanders probeert versterking op te roepen. [pause] [urgently] Schakel hem uit... voor het hem lukt.
+
+--- mission7.mp3 ---
+[softly] [mysterious tone] Eldar Attack één. [pause] Sector 66... Retrieval. [long pause] [slowly] De resten van een verloren eskader Eldar-krijgers zijn door onze psi-scanners opgespoord... in sector 66 van de Space Hulk met codenaam... [dramatically] Denubius. [pause] [firmly] U moet het wrak binnendringen, alle Eldar-runewapens opsporen die daar verborgen liggen... en ze terugbrengen naar de Craftworld.
+
+--- mission8.mp3 ---
+[softly] [mysterious tone] Eldar Attack twee. [pause] Sector 357... Terugtocht door vijandelijke linies. [long pause] [slowly] Tijdens uw missie heeft een warpstorm uw Psychic Screen ontregeld. [pause] Craftworld Saim-hann heeft een nieuw scherm opgewekt, maar dat kan enkel in de volgende sector worden geprojecteerd. [urgently] U moet zich een weg banen door steeds sterkere Alien-troepen... naar het nieuwe Psychic Screen.
+
+--- mission9.mp3 ---
+[softly] [mysterious tone] Eldar Attack drie. [pause] Sector 391... Search and Destroy. [long pause] [slowly] Onze precognitieve psychics hebben de komst voorspeld van een Warp Entity... die intelligente machines overneemt. [pause] [ominously] Ze bevinden zich aan boord van een Space Hulk, die naar bewoonde ruimte koerst. [firmly] U moet aan boord gaan en het wezen uitschakelen voor het te sterk wordt... door alle Androids en Dreadnoughts aan boord te vernietigen.
+
+--- mission10.mp3 ---
+[softly] [mysterious tone] Eldar Attack vier. [pause] Sector 99... Warp Tunnel Navigation Computer. [long pause] [slowly] Aan boord van Space Hulk 669, codenaam... [dramatically] Demonicus... is een eeuwenoude en onschatbare navigatiecomputer voor warptunnels opgespoord. [pause] [warmly] Deze technologie geeft wie ze buitmaakt een enorm voordeel... de macht om lang vergeten warptunnels bloot te leggen... en grote eer voor wie ze verovert. [firmly] U moet de eerste zijn die de computer vindt... en er veilig mee terugkeert.
+

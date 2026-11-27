@@ -1,0 +1,173 @@
+NARRATOR TEXTS — paste each block into your voice tool and save the mp3 under the file name shown.
+
+=== MISSION BRIEFINGS (narratie/mission<N>.mp3) ===
+
+--- mission1.mp3 ---
+Sector 57 — Seek and Destroy. Beta Squad, Alpha Company, has been wiped out by a Dreadnought aboard Alien Vessel 547, code-name Abomination, whilst trying to clear the Sector. You must seek out the Dreadnought and destroy it. Secondary mission: the enemy have deployed a Reconnaissance Android. Locate and eliminate it.
+
+--- mission2.mp3 ---
+Sector 58 — Clearing Action. Sector 57 has been cleared, proceed to sector 58. Alien forces here are known to be under the command of a Chaos Commander. Locate the Chaos Commander and eliminate him. All other aliens must be engaged and destroyed. Secondary mission: intelligence has shown that there are Chaos Space Marine heavy weapons being deployed. Locate and destroy.
+
+--- mission3.mp3 ---
+Sector 105 — Interception. Aliens have been detected in force moving through Sector 105. Intercept and destroy, before they can reinforce the alien perimeter. Secondary mission: the enemy have deployed a Dreadnought. It must be eliminated.
+
+--- mission4.mp3 ---
+Sector 112 — Diversionary Action. Sector 734 must be cleared of aliens. A main assault is to be placed into this sector. A diversionary attack is to be made into sector 112. Casualties must be kept low, your squads will be required to reinforce the main assault after the diversion. Secondary mission: diversion accomplished. All Marines to re-board the docking arms.
+
+--- mission5.mp3 ---
+Sector 734 — Clearing Up. Sector 734 has been taken. However, a small band of Orks and Gretchin are left. Locate and destroy. They may have Chaos Space Marines with them. Secondary mission: the aliens are building a teleporter to bring more forces into this part of the perimeter. It is located in the old Machine rooms. Locate and destroy.
+
+--- mission6.mp3 ---
+Sector 734 — Chaos Marines. Two Chaos Space Marine squads have attacked this sector. They must be eliminated. Secondary mission: one of the Chaos Marine Commanders is attempting to call in reinforcements. Eliminate him before he can do so.
+
+--- mission7.mp3 ---
+Eldar Attack 1 — Sector 66, Retrieval. The remains of a lost squad of Eldar Warriors have been detected by our psi scanners in sector 66 of Space Hulk code name Denubius. You must enter this hulk, locate any Eldar Runic weapons hidden therein and return them to the Craftworld.
+
+--- mission8.mp3 ---
+Eldar Attack 2 — Sector 357, Retreat Through Enemy Lines. During your mission, a warp storm has disrupted your Psychic Screen. Craftworld Saim-hann has generated a new screen but it can only be projected into the next sector. You must fight your way through growing Alien forces to the new Psychic Screen.
+
+--- mission9.mp3 ---
+Eldar Attack 3 — Sector 391, Search and Destroy. Our Pre-Cognitive Psychics have predicted the appearance of a Warp Entity which takes over intelligent machines. These are aboard a Space Hulk travelling towards populated space. You must board this Hulk and neutralise the creature before it grows by destroying any Androids or Dreadnoughts on board.
+
+--- mission10.mp3 ---
+Eldar Attack 4 — Sector 99, Warp Tunnel Navigation Computer. An ancient and invaluable warp tunnel navigational computer has been detected on board Space Hulk 669 code name Demonicus. This technology will provide its captors with a great advantage — the ability to reveal long forgotten warp tunnels — and bring great honour to those who capture it. You must be the first to find this computer and return safely with it.
+
+=== ALIEN EVENT CARDS (narratie/ev_<id>.mp3) ===
+
+--- ev_jammed.mp3 ---
+Weapons Jammed. A Marine player may not fire heavy weapons next turn.
+
+--- ev_genestealer.mp3 ---
+Genestealer. Place a Genestealer next to a Marine; it may move and attack at once.
+
+--- ev_suicide.mp3 ---
+Suicide Android. An Android blows itself up after its move (2 heavy dice, all adjacent miniatures).
+
+--- ev_master.mp3 ---
+Master Controls. The Alien may open or close as many doors as he likes.
+
+--- ev_auto_c.mp3 ---
+Auto-Defence. Fire at a Marine on a corridor square (1 heavy die).
+
+--- ev_auto_r.mp3 ---
+Auto-Defence. Fire at a Marine on a room square (1 heavy die).
+
+--- ev_neworders.mp3 ---
+New Orders. A Marine player may choose an extra Order card.
+
+--- ev_elite.mp3 ---
+Alien Elite. One alien may act twice this turn.
+
+--- ev_frenzy.mp3 ---
+Frenzy!. A Gretchin or Ork may attack twice in hand-to-hand.
+
+--- ev_redeploy.mp3 ---
+Re-Deploy. Up to 3 Blips may be relocated on a scanned board.
+
+--- ev_commo.mp3 ---
+Mothership Commo.. The secondary objective is read out.
+
+--- ev_ammo.mp3 ---
+Out of Ammo. A Marine with a heavy weapon gets a Bolter.
+
+--- ev_equipmal.mp3 ---
+Equipment Malfunction. A Marine player loses an Equipment card.
+
+--- ev_reportin.mp3 ---
+Report In. A Marine player may not move or attack with his Commander next turn.
+
+--- ev_booby.mp3 ---
+Booby Trap. A Marine (not a Commander) steps on a cargo load: Missile Launcher attack on that square.
+
+--- ev_battleplan.mp3 ---
+Battle Plan. Each Marine player may choose an extra Order card.
+
+--- ev_comms.mp3 ---
+Communications Malfunction. A Marine player may not use Order cards next turn.
+
+--- ev_mech.mp3 ---
+Mech. Assault. Androids and the Dreadnought may move and attack twice.
+
+--- ev_mekaniak.mp3 ---
+Ork Mekaniak. An Ork fires an experimental weapon and blows up.
+
+--- ev_psychic.mp3 ---
+Psychic Attack. Gretchins and Orks may not move or fire this turn.
+
+--- ev_taskforce.mp3 ---
+Alien Task Force. Add two random unused Reinforcement tokens.
+
+--- ev_teleporter.mp3 ---
+Alien Teleporter. Two aliens swap places.
+
+--- ev_scan.mp3 ---
+Mothership Scan. All Blips on one board (chosen by a Marine player) are revealed.
+
+--- ev_bomber.mp3 ---
+Gretchin Bomber. A Gretchin throws a grenade (Missile Launcher attack).
+
+--- ev_androidfault.mp3 ---
+Android Fault. Androids and the Dreadnought may not move or fire this turn.
+
+--- ev_lure.mp3 ---
+Lure of Chaos. One Marine (not a Commander): on a 3 he becomes a Chaos Marine.
+
+--- ev_e_redeploy.mp3 ---
+Re-Deploy. You may place up to three Blip tokens onto a board that has already been scanned.
+
+--- ev_e_ammo.mp3 ---
+Out of Ammo. Choose an Eldar Warrior armed with a heavy weapon: it is replaced by a Shuriken Catapult.
+
+--- ev_e_spacewarp.mp3 ---
+Space Warp. You may turn one of the four gameboards around (the boards are fixed in this app: no effect).
+
+--- ev_e_warboss.mp3 ---
+Ork War Boss. An Ork Sergeant allows up to four Orks to move twice this turn (move, attack, move again OR move twice before or after attacking).
+
+--- ev_e_chaoscmdr.mp3 ---
+Chaos Commander. Up to three Chaos Space Marines may move twice this turn (move, attack, move again OR move twice before or after attacking).
+
+--- ev_e_fog.mp3 ---
+Chaos Fog. No Las-Cannons will work until the beginning of the Alien player's next turn.
+
+--- ev_e_gretchin.mp3 ---
+Gretchin Charge. Up to three Gretchin may move up to 16 squares each on their next move.
+
+--- ev_e_laser_c.mp3 ---
+Laser Defence Network. You may attack any block of four corridor squares with two heavy weapons dice as if firing a Las-Cannon.
+
+--- ev_e_laser_r.mp3 ---
+Laser Defence Network. You may attack any block of four room squares with two heavy weapons dice as if firing a Las-Cannon.
+
+--- ev_e_warpstorm.mp3 ---
+Warp Storm. A Warp Storm disrupts the Psychic Screen. You may move it to any unoccupied space on the side of the board.
+
+--- ev_e_genes.mp3 ---
+Genestealers. Place two Genestealers (if available) anywhere on the board. They may attack and move as normal this turn.
+
+--- ev_e_psychic.mp3 ---
+Psychic Attack. The Craftworld sends a massive psychic attack: all Gretchin and Orks may not move or fire on this turn.
+
+--- ev_e_android.mp3 ---
+Android Attack. You may move any Androids eight squares this turn.
+
+--- ev_e_jammed.mp3 ---
+Weapons Jammed. You may jam the Eldar player's weapons: his Warriors may not fire any of their heavy weapons on his next turn.
+
+--- ev_e_elec.mp3 ---
+Electronics Malfunction. All doors are jammed open or closed and remain so until the beginning of the Alien player's next turn.
+
+--- ev_e_decoy.mp3 ---
+Alien Decoy. You may add two dummy Blip tokens. When revealed they are removed immediately and count for no points.
+
+--- ev_e_sending.mp3 ---
+Psychic Sending. The Craftworld sends a psychic boost: the Exarch may pick up one extra command card.
+
+--- ev_e_teleporter.mp3 ---
+Alien Teleporter. Any two Alien miniatures on the board may be swapped over.
+
+--- ev_e_portal.mp3 ---
+Chaos Warp Portal. You may move any one Chaos Space Marine to any other space on the board.
+
+--- ev_e_counter.mp3 ---
+Counter Attack. You may move any two Blip tokens already in play to any other location on the board.

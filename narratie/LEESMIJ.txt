@@ -1,0 +1,5 @@
+NARRATOR
+Zet hier mp3-bestanden. Ontbreekt een bestand, dan leest de app de tekst voor met de stem van het apparaat.
+Engelse versie: narratie/<naam>.mp3   Nederlandse versie (nl.html): narratie/nl/<naam>.mp3
+Namen: mission1.mp3 ... mission10.mp3 (briefing)  |  ev_<id>.mp3 voor Alien-eventkaarten (zie narratie_teksten.txt)
+Na het toevoegen: zip opnieuw uitrollen op GitHub Pages (de offline-cache ververst zichzelf bij de volgende versie).
