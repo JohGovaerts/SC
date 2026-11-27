@@ -20,6 +20,7 @@ button.sec{background:#262b33}
 button.small{min-height:36px;padding:6px 12px;margin-top:8px;font-size:13px}
 #setup{max-width:780px;margin:0 auto;padding:16px 16px 60px;overflow:auto;height:100%}
 h1{margin:6px 0 0;font-size:38px;color:var(--amber);text-shadow:0 2px 0 #000}
+a.langbtn{display:inline-block;margin:10px 0 0;padding:8px 14px;font:700 14px sans-serif;color:#0a0c10;background:var(--amber);border-radius:8px;text-decoration:none}
 h1::after{content:"";display:block;height:10px;margin-top:8px;background:var(--haz)}
 h3{margin:0 0 8px;font-size:20px}
 .sec{margin:16px 0 6px;font-size:13px;color:#9aa6b8;border-bottom:1px solid var(--line);padding-bottom:3px}
@@ -383,6 +384,83 @@ function stepOk(x, y, dx, dy, k) {
   if (dx !== 0 && dy !== 0) return diagOk(x, y, dx, dy, k);
   return !k(edgeKey(x, y, dx, dy));
 }
+function makeScreen(b) {
+  b.screen = true;
+  if (b.door) { for (const e of b.door.edges) G.doorAt.delete(e); G.doors = G.doors.filter(d => d !== b.door); b.door = null; }
+  const c0 = b.start + 2;
+  b.front = [0, 1].map(k => bayCell(b, c0 + k, 0));
+}
+function inScreenFront(b, x, y) { return !!(b && b.screen && b.front.some(f => f[0] === x && f[1] === y)); }
+
+/* ====== Docking claws / Psychic Screen: automatische plaatsing & keuzelijst ====== */
+const isScr = b => b.chapter === 'EL' || b.chapter === 'ELX' || b.screen;
+function bayBox(b) {
+  if (isScr(b)) {
+    const c0 = b.start + 2, xs = [], ys = [];
+    for (let k = 0; k < 2; k++) for (let d = 0; d <= 5; d++) { const [x, y] = bayCell(b, c0 + k, d); xs.push(x); ys.push(y); }
+    return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
+  }
+  const r = bayRect(b), w = r.rot % 2 ? 4 : 6, h = r.rot % 2 ? 6 : 4;
+  return { x0: r.x, y0: r.y, x1: r.x + w - 1, y1: r.y + h - 1 };
+}
+const boxHit = (a, b, m) => !(a.x1 + m < b.x0 || b.x1 + m < a.x0 || a.y1 + m < b.y0 || b.y1 + m < a.y0);
+function bayFronts(b) { const c0 = b.start + 2; return [0, 1].map(k => bayCell(b, c0 + k, 0)); }
+// alle geldige posities (2 aaneengesloten randvakken) voor een claw ('claw') of een Psychic Screen ('screen')
+function screenSpots(kind, taken, srcBays) {
+  const isB = (x, y) => inb(x, y) && G.cell[y][x] && G.cell[y][x].board >= 0 && G.walk[y][x];
+  const depthN = kind === 'claw' ? 4 : 5, out = [];
+  const edgeAt = (side, c) => {
+    const horiz = side === 'top' || side === 'bottom', len = horiz ? MW : MH, len2 = horiz ? MH : MW;
+    if (c < 0 || c >= len) return null;
+    for (let t = 0; t < len2; t++) {
+      const i = (side === 'top' || side === 'left') ? t : len2 - 1 - t;
+      const x = horiz ? OFF + c : OFF + i, y = horiz ? OFF + i : OFF + c;
+      if (isB(x, y)) return i;
+    }
+    return null;
+  };
+  const boxes = taken.map(bayBox);
+  let dm = null;
+  if (srcBays && srcBays.length) { const src = []; for (const b of srcBays) for (const f of bayFronts(b)) src.push(f); dm = bfsFrom(src); }
+  for (const side of ['top', 'bottom', 'left', 'right']) {
+    const len = (side === 'top' || side === 'bottom') ? MW : MH;
+    for (let c0 = 0; c0 + 1 < len; c0++) {
+      const e1 = edgeAt(side, c0), e2 = edgeAt(side, c0 + 1);
+      if (e1 == null || e1 !== e2) continue;
+      const b = { side, start: c0 - 2, edge: e1, chapter: kind === 'claw' ? 'XX' : 'EL' };
+      const fr = bayFronts(b);
+      if (!fr.every(([x, y]) => isB(x, y))) continue;
+      const [ax, ay] = fr[0], [bx, by] = fr[1];
+      if (G.wall.has(edgeKey(ax, ay, bx - ax, by - ay))) continue;
+      const stg = []; let ok = true;
+      for (let d = 1; d <= depthN && ok; d++) for (let k = 0; k < 2; k++) { const [x, y] = bayCell(b, c0 + k, d); if (x < 1 || y < 1 || x >= N - 1 || y >= N - 1 || G.cell[y][x]) { ok = false; break; } stg.push([x, y]); }
+      if (!ok) continue;
+      if (kind === 'claw') { const bx2 = bayBox(b); for (let y = bx2.y0; y <= bx2.y1 && ok; y++) for (let x = bx2.x0; x <= bx2.x1; x++) if (x < 1 || y < 1 || x >= N - 1 || y >= N - 1 || G.cell[y][x]) { ok = false; break; } }
+      if (!ok) continue;
+      const sk = new Set(stg.map(c => K(c[0], c[1]))), fk = new Set(fr.map(c => K(c[0], c[1])));
+      for (const [x, y] of stg) for (const [dx, dy] of DIRS8.slice(0, 4)) { const nx = x + dx, ny = y + dy; if (isB(nx, ny) && !fk.has(K(nx, ny)) && !sk.has(K(nx, ny))) ok = false; }
+      if (!ok) continue;
+      const box = bayBox(b);
+      if (boxes.some(o => boxHit(box, o, 1))) continue;
+      let dist = 99;
+      if (dm) { const d0 = dm.get(K(ax, ay)), d1 = dm.get(K(bx, by)); dist = (d0 == null && d1 == null) ? -1 : Math.min(d0 == null ? 99 : d0, d1 == null ? 99 : d1); }
+      out.push({ side, start: c0 - 2, edge: e1, fronts: fr, dist });
+    }
+  }
+  return out;
+}
+function autoSpot(kind, taken) {
+  const srcs = taken.filter(b => kind === 'screen' ? !isScr(b) : true);
+  const sp = screenSpots(kind, taken, srcs);
+  if (!sp.length) return null;
+  const good = sp.filter(q => q.dist >= 18);
+  if (good.length) return good[Math.floor(Math.random() * good.length)];
+  return sp.reduce((a, q) => q.dist > a.dist ? q : a, sp[0]);
+}
+function openDoorway(b) {   // buitenmuur tussen opstelzone en randvakken weghalen
+  const c0 = b.start + 2;
+  for (let k = 0; k < 2; k++) { const [x1, y1] = bayCell(b, c0 + k, 1), [x0, y0] = bayCell(b, c0 + k, 0); G.wall.delete(edgeKey(x1, y1, x0 - x1, y0 - y1)); }
+}
 function reachable(u) {
   // BFS met kosten; geeft Map key -> {d, from}
   const max = moveAllowance(u);
@@ -391,6 +469,16 @@ function reachable(u) {
   res.set(start, { d: 0, from: null, x: u.x, y: u.y });
   let frontier = [[u.x, u.y]];
   const friendly = o => o.side === u.side;
+  // Eldar in het Psychic Screen: ze beginnen hun beweging op het vak voor de deur
+  const sc0 = G.cell[u.y][u.x];
+  if (u.side === 'M' && u.size !== 2 && sc0 && sc0.room === 'bay') {
+    const sb = G.bays.find(b => b.screen && b.chapter === sc0.bay);
+    if (sb) for (const [fx, fy] of sb.front) {
+      const o = G.occ.get(K(fx, fy));
+      if (!cellOk(fx, fy) || res.has(K(fx, fy)) || (o && o !== u && !friendly(o))) continue;
+      res.set(K(fx, fy), { d: 0, from: start, x: fx, y: fy }); frontier.push([fx, fy]);
+    }
+  }
   while (frontier.length) {
     const next = [];
     for (const [x, y] of frontier) {
@@ -521,9 +609,19 @@ function setupGame(missionId, playerCfgs, assets) {
     const edges = dr.e.map(([o, a, b]) => o === 'v' ? 'v' + (a + OFF) + ',' + (b + OFF) : 'h' + (b + OFF) + ',' + (a + OFF));
     addDoor(edges, dr.closed, false);
   }
-  // bays
+  // bays (missie-vast + automatisch geplaatste claws / Psychic Screen)
   G.bays = [];
-  for (const b of M.bays) {
+  const specs = M.bays.map(b => Object.assign({}, b));
+  const hasCh = ch => specs.some(b => b.chapter === ch);
+  for (const ch of ['UM', 'BA', 'IF']) if (playerCfgs.some(c => c.chapter === ch) && !hasCh(ch)) {
+    const sp = autoSpot('claw', specs); if (sp) { sp.chapter = ch; sp.auto = true; specs.push(sp); }
+  }
+  const eCfg = playerCfgs.find(c => c.chapter === 'EL');
+  if (eCfg && !hasCh('EL')) {
+    const sp = eCfg.screen ? Object.assign({ chapter: 'EL', auto: true }, eCfg.screen) : autoSpot('screen', specs);
+    if (sp) { sp.chapter = 'EL'; sp.auto = true; specs.push(sp); }
+  }
+  for (const b of specs) {
     const c0 = b.start + 2, cells = [];
     for (let dpt = 1; dpt <= 4; dpt++) for (let k = 0; k < 2; k++) {
       const [x, y] = bayCell(b, c0 + k, dpt);
@@ -539,7 +637,8 @@ function setupGame(missionId, playerCfgs, assets) {
       else edges.push('v' + x + ',' + y);
     }
     addDoor(edges, true, true); if (b.chapter === 'EL') G.doors[G.doors.length - 1].bayEL = true;
-    G.bays.push({ chapter: b.chapter, side: b.side, start: b.start, edge: b.edge, cells });
+    G.bays.push({ chapter: b.chapter, side: b.side, start: b.start, edge: b.edge, cells, door: G.doors[G.doors.length - 1], auto: !!b.auto });
+    if (b.auto) openDoorway(G.bays[G.bays.length - 1]);
   }
   // Eldar nemen een vrije bay (Psychic Screen) als de missie er geen heeft, en krijgen diepte 5 voor 10 miniaturen
   for (const cfg of playerCfgs) if (cfg.chapter === 'EL' && !G.bays.some(b => b.chapter === 'EL')) {
@@ -556,6 +655,8 @@ function setupGame(missionId, playerCfgs, assets) {
       b.cells.push([x, y, dpt]);
     }
   }
+  // Psychic Screen = deur in de kaartrand (geen docking claw): geen luchtsluis, Eldar starten vanaf het vak voor de deur
+  for (const b of G.bays) if (b.chapter === 'EL' || b.chapter === 'ELX') makeScreen(b);
   // spelers
   playerCfgs.forEach((cfg, i) => {
     const bay = G.bays.find(b => b.chapter === cfg.chapter);
@@ -599,7 +700,7 @@ function setupGame(missionId, playerCfgs, assets) {
   G.eventDiscard = [];
   rebuildOcc();
   G.totalTokenPts = 0;
-  log(`Missie ${missionId} gestart. Marines starten in hun docking-bay.`);
+  log(`Missie ${missionId} gestart. ` + (playerCfgs.some(c => c.chapter === 'EL') ? 'Eldar komen binnen door het Psychic Screen: ze starten hun beweging op het vak voor de deur.' : 'Marines starten in hun docking-bay.'));
   return G;
 }
 let TID = 1;
@@ -733,14 +834,15 @@ function unclaimedTokens(filter) {
   n += G.units.filter(u => u.alive && u.kind === 'blip' && f(u.token)).length;
   return n;
 }
-function inOwnBay(m) { const c = G.cell[m.y][m.x]; return !!(c && c.bay === G.players[m.owner].chapter); }
+function inOwnBay(m) { const c = G.cell[m.y][m.x]; return !!(c && c.bay === G.players[m.owner].chapter) || inScreenFront(G.players[m.owner].bay, m.x, m.y); }
 function checkEnd() {
   if (G.over) return;
   const r = G.mission.rules;
   const alive = marines().length;
   if (!alive) return endGame('Alle Marines zijn uitgeschakeld.');
   if (G.awards.primary == null && r.primary === 'ea_screen') {
-    const inX = marines().filter(m => { const c = G.cell[m.y][m.x]; return c && c.bay === 'ELX'; });
+    const xb0 = G.bays.find(b => b.chapter === 'ELX');
+    const inX = marines().filter(m => { const c = G.cell[m.y][m.x]; return (c && c.bay === 'ELX') || inScreenFront(xb0, m.x, m.y); });
     if (inX.length >= 5 && inX.some(m => m.kind === 'cmdr')) { award('primary', inX[0].owner, 'the squad reached the new Psychic Screen'); return endGame('The squad reached the new Psychic Screen.'); }
   }
   if (G.awards.primary == null && r.primary === 'ea_equip') { const c = marines().find(m => m.carry && inOwnBay(m)); if (c) award('primary', c.owner, 'Equipment token brought back through the Psychic Screen'); }
@@ -776,7 +878,7 @@ function checkDock() {
   for (const P of G.players) {
     const ms = marines().filter(u => u.owner === P.idx);
     if (!ms.length || G.round < 2) continue;
-    if (ms.every(u => G.cell[u.y][u.x] && G.cell[u.y][u.x].bay === P.chapter)) { award('secondary', P.idx, 'alle mannen terug op de docking claw'); return; }
+    if (ms.every(u => inOwnBay(u))) { award('secondary', P.idx, 'alle mannen terug op de docking claw'); return; }
   }
 }
 
@@ -1439,7 +1541,7 @@ function moveEldarBay() {
   for (let dpt = 1; dpt <= 5; dpt++) for (let k = 0; k < 2; k++) { const [x, y] = bayCell(nb, c0 + k, dpt); G.walk[y][x] = true; G.cell[y][x] = { board: -1, room: 'bay', bay: 'EL' }; b.cells.push([x, y, dpt]); }
   const edges = [];
   for (const [x, y, dpt] of b.cells) if (dpt === 1) { if (b.side === 'top') edges.push('h' + x + ',' + (y + 1)); else if (b.side === 'bottom') edges.push('h' + x + ',' + y); else if (b.side === 'left') edges.push('v' + (x + 1) + ',' + y); else edges.push('v' + x + ',' + y); }
-  const d = { id: 1 + Math.max(-1, ...G.doors.map(q => q.id)), edges, closed: true, airlock: true, bayEL: true }; G.doors.push(d); for (const e of edges) G.doorAt.set(e, d);
+  b.door = null; makeScreen(b);
   log(`Warp Storm: the Psychic Screen has moved to the ${nb.side} side of the board.`, 'ev');
   if (typeof initView === 'function' && !G.fast) initView();
 }
@@ -1847,7 +1949,8 @@ try { TILT = localStorage.getItem('mb_tilt') !== '0'; } catch (e) { }
 function setTilt(t) { TILT = t; try { localStorage.setItem('mb_tilt', t ? '1' : '0'); } catch (e) { } layout(); renderPanel(); }
 function initView() {
   let l = 0, r = 0, t = 0, b = 0;
-  for (const bay of G.bays) { if (bay.side === 'left') l = bay.chapter === 'EL' ? 5 : 4; if (bay.side === 'right') r = bay.chapter === 'EL' ? 5 : 4; if (bay.side === 'top') t = bay.chapter === 'EL' ? 5 : 4; if (bay.side === 'bottom') b = bay.chapter === 'EL' ? 5 : 4; }
+  for (const bay of G.bays) { const m = isScr(bay) ? 5 : 4; if (bay.side === 'left') l = Math.max(l, m); if (bay.side === 'right') r = Math.max(r, m); if (bay.side === 'top') t = Math.max(t, m); if (bay.side === 'bottom') b = Math.max(b, m); }
+  if (G.pick) l = r = t = b = 5;
   VX = OFF - l; VY = OFF - t; VW = MW + l + r; VH = MH + t + b; ZF = 1;
   G.wallList = [...G.wall].map(k => { const o = k[0]; const [a, b2] = k.slice(1).split(',').map(Number); return { o, a, b: b2 }; })
     .filter(w => w.a >= OFF - 1 && w.b >= OFF - 1 && w.a <= OFF + MW && w.b <= OFF + MH);
@@ -2004,6 +2107,29 @@ const FIGH = { android: 1.75, cmdrc: 1.6, csm: 1.5, csmheavy: 1.5, dread: 2.6, g
 function plane(x, y, w, h, rot, drawFn) {
   cx.save(); cx.translate(PX(x + w / 2), PY(y + h / 2)); cx.scale(1, SY); cx.rotate(rot * Math.PI / 2); drawFn(); cx.restore();
 }
+function drawScreen(bay, dim) {
+  // Psychic Screen: gloeiende deur in de kaartrand + smalle opstelzone erachter
+  const col = '#2fe0d0', c0 = bay.start + 2, xs = [], ys = [];
+  for (let k = 0; k < 2; k++) for (let d = 1; d <= 5; d++) { const [x, y] = bayCell(bay, c0 + k, d); xs.push(x); ys.push(y); }
+  const x0 = Math.min(...xs), y0 = Math.min(...ys), x1 = Math.max(...xs) + 1, y1 = Math.max(...ys) + 1;
+  cx.save();
+  cx.fillStyle = 'rgba(47,224,208,.10)'; cx.fillRect(PX(x0), PY(y0), (x1 - x0) * CS, (y1 - y0) * CS * SY);
+  cx.setLineDash([6, 6]); cx.strokeStyle = 'rgba(47,224,208,.45)'; cx.lineWidth = 2;
+  cx.strokeRect(PX(x0) + 1, PY(y0) + 1, (x1 - x0) * CS - 2, (y1 - y0) * CS * SY - 2); cx.setLineDash([]);
+  let lx0, ly0, lx1, ly1, ix, iy;
+  if (bay.side === 'bottom') { lx0 = x0; lx1 = x1; ly0 = ly1 = y0; ix = 0; iy = -1; }
+  else if (bay.side === 'top') { lx0 = x0; lx1 = x1; ly0 = ly1 = y1; ix = 0; iy = 1; }
+  else if (bay.side === 'left') { ly0 = y0; ly1 = y1; lx0 = lx1 = x1; ix = 1; iy = 0; }
+  else { ly0 = y0; ly1 = y1; lx0 = lx1 = x0; ix = -1; iy = 0; }
+  cx.globalAlpha = dim ? .35 : 1;
+  cx.shadowColor = col; cx.shadowBlur = 14; cx.strokeStyle = col; cx.lineWidth = Math.max(5, CS * .26); cx.lineCap = 'round';
+  cx.beginPath(); cx.moveTo(PX(lx0), PY(ly0)); cx.lineTo(PX(lx1), PY(ly1)); cx.stroke(); cx.shadowBlur = 0;
+  const mx = (PX(lx0) + PX(lx1)) / 2, my = (PY(ly0) + PY(ly1)) / 2, a = CS * .5;
+  const px = ix * a, py = iy * a * SY, nx = -iy * a, ny = ix * a * SY;
+  cx.fillStyle = col; cx.beginPath();
+  cx.moveTo(mx + px * 1.1, my + py * 1.1); cx.lineTo(mx - px * .2 + nx * .55, my - py * .2 + ny * .55); cx.lineTo(mx - px * .2 - nx * .55, my - py * .2 - ny * .55); cx.closePath(); cx.fill();
+  cx.restore();
+}
 function draw() {
   if (!G || !cx) return;
   cx.clearRect(0, 0, CW, CH);
@@ -2013,6 +2139,7 @@ function draw() {
     const w = 6, h = 4; let x, y, rot;
     ({ x, y, rot } = bayRect(bay));
     const bw = (rot % 2 ? h : w), bh = (rot % 2 ? w : h);
+    if (bay.screen) { if (!(G.pick && bay.chapter === 'EL')) drawScreen(bay, bay.chapter === 'EL' && !G.players.some(p => p.chapter === 'EL')); continue; }
     plane(x, y, bw, bh, 0, () => { cx.rotate(rot * Math.PI / 2); if (IMG.bay && IMG.bay.complete) cx.drawImage(IMG.bay, -w * CS / 2, -h * CS / 2, w * CS, h * CS); });
     cx.strokeStyle = PLAYER_COLORS[bay.chapter]; cx.lineWidth = 3;
     cx.strokeRect(PX(x) + 1.5, PY(y) + 1.5, bw * CS - 3, bh * CS * SY - 3);
@@ -2057,6 +2184,7 @@ function draw() {
   for (const [k, v] of S.reach) fl(v.x, v.y, 'rgba(70,140,255,.38)');
   for (const k of (G.walls || [])) { const [wx, wy] = k.split(',').map(Number); fl(wx, wy, 'rgba(0,230,255,.50)'); }
   for (const [x, y] of S.cells) fl(x, y, 'rgba(255,200,40,.30)');
+  if (G.pick) { for (const sp of G.pick.spots) for (const [x, y] of sp.fronts) fl(x, y, 'rgba(47,224,208,.45)'); if (G.pick.sel) for (const [x, y] of G.pick.sel.fronts) fl(x, y, 'rgba(255,255,255,.75)'); }
   for (const [x, y] of S.rays) fl(x, y, 'rgba(255,120,40,.28)');
   // objecten (schilderalgoritme)
   const items = [];
@@ -2429,6 +2557,7 @@ function destroyTele(u) {
 
 /* ---------- Invoer ---------- */
 function onTap(ev) {
+  if (G && G.pick) { const r0 = cvs.getBoundingClientRect(); return void pickTap(Math.floor((ev.clientX - r0.left) / CS) + VX, Math.floor((ev.clientY - r0.top - TOP) / (CS * SY)) + VY); }
   if (!G || G.busy || G.over || G.turn.phase !== 'marine') return;
   const r = cvs.getBoundingClientRect();
   const px = ev.clientX - r.left, py = ev.clientY - r.top;
@@ -2773,15 +2902,15 @@ function campPanel() {
   return h;
 }
 function renderSetup() {
-  let h = '<h1>Missiebord</h1>';
+  let h = '<h1>Missiebord</h1>' + ((document.documentElement.lang || 'nl') === 'en' ? '<a class="langbtn" href="nl.html">Nederlandse versie →</a>' : '<a class="langbtn" href="index.html">English version →</a>');
   const sm = hasSave() ? saveMeta() : null;
   if (sm) h += `<div class="card"><h3>Missie in uitvoering</h3><div class="small">Missie ${sm.mid} · ronde ${sm.round} · ${esc((sm.players || []).join(', '))}</div><div class="row"><button class="big" style="margin:8px 0 0;flex:1" data-s="resume">Doorgaan</button><button class="small sec" data-s="delsave">Wissen</button></div></div>`;
   h += campPanel() + '<div class="sec">Missie</div><div class="row wrap">';
   for (let i = 1; i <= 10; i++) h += `<button class="${CFG.mission === i ? 'on' : ''}" data-s="mission" data-v="${i}">${i > 6 ? 'Eldar ' + (i - 6) : i}</button>`;
   const r = MISSIONS[CFG.mission].rules;
   h += `</div><div class="card small"><b>Primair:</b> ${MISSION_TXT.primary[r.primary]}<br><b>Secundair:</b> ${MISSION_TXT.secondary[r.secondary]}</div>`;
-  h += '<div class="sec">Aantal Marine-spelers</div><div class="row">';
-  if (CFG.mission >= 7 && CFG.mission <= 9) h += '<button class="on">1 Eldar</button>'; else if (CFG.mission === 10) h += '<button class="on">4 squads (UM, BA, IF + Eldar)</button>'; else for (let i = 1; i <= 3; i++) h += `<button class="${CFG.n === i ? 'on' : ''}" data-s="n" data-v="${i}">${i}</button>`;
+  h += '<div class="sec">Aantal spelers</div><div class="row">';
+  if (CFG.mission >= 7 && CFG.mission <= 9) h += '<button class="on">1 Eldar</button>'; else if (CFG.mission === 10) h += '<button class="on">4 squads (UM, BA, IF + Eldar)</button>'; else for (let i = 1; i <= 4; i++) h += `<button class="${CFG.n === i ? 'on' : ''}" data-s="n" data-v="${i}">${i}</button>`;
   h += '</div>';
   let bad = false;
   for (let i = 0; i < CFG.n; i++) {
@@ -2846,7 +2975,6 @@ async function onSetup(ev) {
     const setCh = (c, ch) => { if (c.chapter !== ch) { c.chapter = ch; c.eqIdx = []; c.orders = []; c.marines = ch === 'EL' ? ELD_DEFAULT() : ['ac', 'bolter', 'bolter', 'ml']; } else if (ch === 'EL') c.marines = ELD_DEFAULT(); };
     if (CFG.mission >= 7 && CFG.mission <= 9) { CFG.n = 1; setCh(CFG.players[0], 'EL'); }
     else if (CFG.mission === 10) { CFG.n = 4; ['UM', 'BA', 'IF', 'EL'].forEach((ch, i) => setCh(CFG.players[i], ch)); }
-    else { if (CFG.n > 3) CFG.n = 3; CFG.players.forEach((c, i) => { if (c.chapter === 'EL') { setCh(c, ['UM', 'BA', 'IF'][i] || 'UM'); } }); }
   }
   else if (s === 'n') CFG.n = +v;
   else if (s === 'camp') { CAMP.data.on = !CAMP.data.on; campSave(); }
@@ -2867,6 +2995,34 @@ async function onSetup(ev) {
   if (['mission', 'chapter', 'camp', 'trade_m', 'camp_reset'].includes(s)) CFG.players.forEach(c => { if (s === 'chapter' && c !== CFG.players[p]) return; normalize(c); });
   renderSetup();
 }
+
+/* ---------- Psychic Screen kiezen (missies zonder vaste locatie) ---------- */
+const EN_UI = (document.documentElement.lang || 'nl') === 'en';
+const LL = (nl, en) => EN_UI ? en : nl;
+function pickScreen(cfgs) {
+  return new Promise(async res => {
+    const taken = G.bays.map(b => ({ side: b.side, start: b.start, edge: b.edge, chapter: b.chapter }));
+    const all = screenSpots('screen', taken, taken.filter(b => !isScr(b)));
+    const best = all.reduce((m, q) => Math.max(m, q.dist), 0), need = Math.min(18, best);
+    const spots = all.filter(q => q.dist >= need);
+    if (!spots.length) { toast('Geen geschikte plek gevonden: automatisch gekozen.'); return res(null); }
+    G.pick = { spots, sel: null, res, busy: false };
+    initView(); draw();
+    await modal(LL('<h3>Psychic Screen plaatsen</h3><p>Tik op een <b>lichtblauw vakje</b> aan de rand van de kaart om de deur van het Psychic Screen te plaatsen. Alle Eldar starten hun beweging op het vakje voor die deur. De deur moet minstens 18 vakjes (rond muren heen) van elke docking claw liggen.</p>' + (need < 18 ? `<p><b>Op deze kaart kan dat niet:</b> de verste mogelijke plekken liggen op ${need} vakjes en zijn hier toegestaan.</p>` : ''),
+      '<h3>Place the Psychic Screen</h3><p>Tap a <b>light-blue square</b> on the edge of the board to place the door of the Psychic Screen. All Eldar start their move on the square in front of that door. The door must be at least 18 squares (counting around walls) from every docking claw.</p>' + (need < 18 ? `<p><b>Not possible on this map:</b> the farthest possible spots are at ${need} squares and are allowed here.</p>` : '')), [['OK', 1]]);
+  });
+}
+async function pickTap(x, y) {
+  const pk = G.pick; if (!pk || pk.busy) return;
+  const cand = pk.spots.filter(q => q.fronts.some(f => f[0] === x && f[1] === y));
+  if (!cand.length) return toast('Kies een lichtblauw vakje.');
+  const sp = cand.find(q => q.fronts[0][0] === x && q.fronts[0][1] === y) || cand[0];
+  pk.sel = sp; pk.busy = true; draw();
+  const r = await modal(LL(`<h3>Psychic Screen hier plaatsen?</h3><p>Afstand tot de dichtstbijzijnde docking claw: <b>${sp.dist}</b> vakjes.</p>`, `<h3>Place the Psychic Screen here?</h3><p>Distance to the nearest docking claw: <b>${sp.dist}</b> squares.</p>`), [[LL('Andere plek', 'Other spot'), 0, 'sec'], [LL('Ja, hier', 'Yes, here'), 1]]);
+  pk.busy = false;
+  if (!r) { pk.sel = null; draw(); return; }
+  G.pick = null; pk.res({ side: sp.side, start: sp.start, edge: sp.edge });
+}
 async function startGame() {
   const cfgs = CFG.players.slice(0, CFG.n).map(c => {
     const cc = CHAPTER_CARDS[c.chapter];
@@ -2881,9 +3037,20 @@ async function startGame() {
     if (c.chapter === 'EL') return { chapter: 'EL', name: 'Eldar', cmdr: 'exarch', marines: c.marines.slice(), equip: eqIdx.map(j => cc.equip[j]), orders: c.orders.slice().sort().map(j => cc.order[j]), xcards: c.xIdx.slice().sort((a, b) => a - b).map(j => CHAPTER_CARDS.EL.xcards[j]), targeter: [] };
     return { chapter: c.chapter, name: CHAPTER_NAME[c.chapter], cmdr: c.cmdr, marines: c.marines.slice(), equip: eqIdx.map(j => cc.equip[j]), orders: c.orders.slice().sort().map(j => cc.order[j]), targeter: c.targeter.slice() };
   });
-  clearSave(); setupGame(CFG.mission, cfgs, ASSETS);
-  cfgs.forEach((c, i) => { if (c.ai) G.players[i].ai = { diff: c.ai }; });
-  G.fast = false; applyCampaignToGame();
+  clearSave();
+  const build = () => { setupGame(CFG.mission, cfgs, ASSETS); cfgs.forEach((c, i) => { if (c.ai) G.players[i].ai = { diff: c.ai }; }); G.fast = false; applyCampaignToGame(); };
+  const needPick = cfgs.some(c => c.chapter === 'EL' && !c.ai) && !MISSIONS[CFG.mission].bays.some(b => b.chapter === 'EL');
+  if (needPick) {
+    // voorbeeldbord zonder Eldar: de speler kiest eerst de plaats van het Psychic Screen
+    const keep = cfgs.slice(), ei = cfgs.findIndex(c => c.chapter === 'EL');
+    const others = cfgs.filter(c => c.chapter !== 'EL');
+    cfgs.length = 0; others.forEach(c => cfgs.push(c)); build();
+    $('setup').classList.add('hidden'); $('game').classList.remove('hidden'); await loadImages(ASSETS); clearSel(); S.info = null;
+    const spec = await pickScreen();
+    cfgs.length = 0; keep.forEach(c => cfgs.push(c));
+    if (spec) cfgs[ei].screen = spec;
+  }
+  build();
   $('setup').classList.add('hidden'); $('game').classList.remove('hidden');
   await loadImages(ASSETS);
   clearSel(); S.info = null;
